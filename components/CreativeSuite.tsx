@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { generateVisual, editImageWithNano } from '../services/geminiService';
 import { ToolType, AIModelType } from '../types';
+import { validateImageFile } from '../services/security';
 
 const REMIX_TEMPLATES = [
   { id: 'style-morph', label: 'Neural Morph', icon: '🎨', desc: 'Transform aesthetic style' },
@@ -29,6 +30,11 @@ const CreativeSuite: React.FC = () => {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const check = validateImageFile(file);
+      if (!check.valid) {
+        setError(check.error ?? 'Invalid file.');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => setSourcePreview(reader.result as string);
       reader.readAsDataURL(file);

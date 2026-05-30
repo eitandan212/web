@@ -1,6 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { removeWatermark } from '../services/geminiService';
+import { validateImageFile } from '../services/security';
 
 const WatermarkEraser: React.FC = () => {
   const [sourceImage, setSourceImage] = useState<string | null>(null);
@@ -15,6 +16,11 @@ const WatermarkEraser: React.FC = () => {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const check = validateImageFile(file);
+      if (!check.valid) {
+        setError(check.error ?? 'Invalid file.');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         setSourceImage(reader.result as string);

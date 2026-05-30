@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { editImageWithNano } from '../services/geminiService';
 import { AIModelType } from '../types';
+import { validateImageFile } from '../services/security';
 
 const IMAGE_MODELS = [
   { id: 'gemini-2.5-flash-image', label: 'Flash Nano', desc: 'Fast & efficient editing', color: 'text-cyan-400' },
@@ -23,6 +24,11 @@ const ImageRemix: React.FC = () => {
   const onUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const check = validateImageFile(file);
+      if (!check.valid) {
+        setError(check.error ?? 'Invalid file.');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
         setSourceFile(reader.result as string);

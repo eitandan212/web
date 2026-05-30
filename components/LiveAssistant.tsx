@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality } from '@google/genai';
+import { getApiKey } from '../services/security';
 
 const LiveAssistant: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
@@ -50,7 +51,7 @@ const LiveAssistant: React.FC = () => {
     
     try {
       // Create fresh instance right before call
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: getApiKey() });
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
       outputNodeRef.current = audioContextRef.current.createGain();
       outputNodeRef.current.connect(audioContextRef.current.destination);

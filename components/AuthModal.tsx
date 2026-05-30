@@ -29,6 +29,14 @@ interface AuthModalProps {
   onLoginSuccess: () => void;
 }
 
+/**
+ * SECURITY WARNING: This component provides NO real authentication.
+ * All login buttons simply call onLoginSuccess() after a cosmetic delay.
+ * The email input is not validated or sent anywhere.
+ *
+ * For production, replace with a real auth provider (Firebase Auth,
+ * Auth0, Supabase Auth, etc.) and validate sessions server-side.
+ */
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
   const [authStep, setAuthStep] = useState<'form' | 'scanning' | 'success'>('form');
 
@@ -38,7 +46,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
     e?.preventDefault();
     setAuthStep('scanning');
 
-    // Simulate futuristic biometric/neural scan
+    // WARNING: No real authentication — cosmetic animation only.
+    // Replace with actual OAuth / credential verification for production.
     setTimeout(() => {
       setAuthStep('success');
       setTimeout(() => {
