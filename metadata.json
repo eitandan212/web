@@ -1,0 +1,7 @@
+{
+  "name": "Visionary AI - Professional Neural Studio",
+  "description": "A world-class AI video editing suite with advanced cinematic controls, social distribution, and a live neural director.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
