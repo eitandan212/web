@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { analyzeVideoForEdit, editImageWithNano } from '../services/geminiService';
 import { AIModelType } from '../types';
+import { validateVideoFile } from '../services/security';
 
 const EDIT_MODES = [
   { id: 'auto-cut', label: 'Flash Smart Cut', icon: '✂️', desc: 'Neural pacing and moment detection' },
@@ -28,6 +29,11 @@ const AutoDirector: React.FC = () => {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const check = validateVideoFile(file);
+      if (!check.valid) {
+        setError(check.error ?? 'Invalid file.');
+        return;
+      }
       setSourceVideo(URL.createObjectURL(file));
       setAnalysis(null);
       setResultFrame(null);

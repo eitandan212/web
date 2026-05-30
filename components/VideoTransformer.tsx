@@ -1,6 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { editImageWithNano } from '../services/geminiService';
+import { validateImageFile } from '../services/security';
 
 const VideoTransformer: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -13,6 +14,11 @@ const VideoTransformer: React.FC = () => {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const check = validateImageFile(file);
+      if (!check.valid) {
+        setError(check.error ?? 'Invalid file.');
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);

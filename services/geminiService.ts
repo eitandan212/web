@@ -1,12 +1,13 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { VisualConfig, ScriptResponse, AIModelType } from "../types";
+import { getApiKey } from "./security";
 
 /**
  * Neural Frame Analysis: Analyzes video frames for editing suggestions.
  */
 export const analyzeVideoForEdit = async (base64VideoFrame: string, prompt: string, model: AIModelType = 'gemini-3-flash-preview') => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   const data = base64VideoFrame.split(',')[1] || base64VideoFrame;
 
   const response = await ai.models.generateContent({
@@ -41,7 +42,7 @@ export const analyzeVideoForEdit = async (base64VideoFrame: string, prompt: stri
  * Uses high-speed Flash Image model.
  */
 export const removeWatermark = async (base64Image: string, targetDescription: string = "watermark or logo") => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   const data = base64Image.includes('base64,') ? base64Image.split('base64,')[1] : base64Image;
 
   const response = await ai.models.generateContent({
@@ -74,7 +75,7 @@ export const editImageWithNano = async (
   prompt: string, 
   model: AIModelType = 'gemini-2.5-flash-image'
 ) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   const data = base64Image.includes('base64,') ? base64Image.split('base64,')[1] : base64Image;
 
   const response = await ai.models.generateContent({
@@ -97,7 +98,7 @@ export const editImageWithNano = async (
 };
 
 export const generateVisual = async (config: VisualConfig) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   const response = await ai.models.generateContent({
     model: config.model || 'gemini-2.5-flash-image',
     contents: { parts: [{ text: config.prompt }] },
@@ -111,7 +112,7 @@ export const generateVisual = async (config: VisualConfig) => {
 };
 
 export const generateSpeech = async (text: string, voice: string = 'Kore') => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash-preview-tts",
     contents: [{ parts: [{ text }] }],
@@ -124,7 +125,7 @@ export const generateSpeech = async (text: string, voice: string = 'Kore') => {
 };
 
 export const createSupportChat = (language: 'he' | 'en') => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   return ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: { systemInstruction: language === 'he' ? "ענה בעברית כיועץ עריכה מקצועי." : "Answer in English as a professional editing consultant." },
@@ -132,7 +133,7 @@ export const createSupportChat = (language: 'he' | 'en') => {
 };
 
 export const autoDirectTemplate = async (templateId: string, topic: string): Promise<ScriptResponse[]> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Create a storyboard for ${templateId} about: "${topic}". JSON array only.`,
@@ -160,7 +161,7 @@ export const autoDirectTemplate = async (templateId: string, topic: string): Pro
  * Fixed: Export missing function and follow Type.OBJECT rules.
  */
 export const generateCatchyTitle = async (context: string, platform: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Generate a viral, catchy title for a ${platform} video about: "${context}". Return ONLY JSON.`,
