@@ -1,20 +1,49 @@
+# Pulse · Music Player 🎧
+
+A sleek, **mobile-first music player** built with React + Vite + Tailwind CSS.
+Designed to look and feel like a native phone app right in the browser.
+
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <em>Home · Now Playing · Liked Songs</em>
 </div>
 
-# Run and deploy your AI Studio app
+## Features
 
-This contains everything you need to run your app locally.
+- 📱 **Phone-shell layout** — centered device frame on desktop, full-screen on mobile
+- 🎵 **Real audio playback** via the HTML5 Audio API (play / pause / next / prev / seek / volume)
+- 🔀 **Shuffle & repeat** modes
+- 💿 **Now Playing** screen with album art, ambient color background and live progress
+- 🔎 **Search** across songs, artists and albums
+- ❤️ **Liked Songs** library
+- 🎚️ **Mini player** with progress hairline that expands to the full player
+- 🔒 **OS / lock-screen controls** via the Media Session API
+- 🎨 **Generated album covers** — gradients + glyphs, so there are no image assets to ship
 
-View your app in AI Studio: https://ai.studio/apps/drive/1mBaiXO-KF-cHTiBOfxyA2MC_PhtNBse_
+> Demo tracks stream from [SoundHelix](https://www.soundhelix.com/) (royalty-free).
+> Swap the `src` fields in [`data/tracks.ts`](data/tracks.ts) to use your own.
 
-## Run Locally
+## Run locally
 
-**Prerequisites:**  Node.js
+**Prerequisites:** Node.js
 
+```bash
+npm install
+npm run dev      # start the dev server (http://localhost:3000)
+npm run build    # production build into dist/
+npm run preview  # preview the production build
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Project structure
+
+```
+App.tsx              # player state, audio wiring, navigation
+index.tsx            # entry point (mounts App, imports index.css)
+index.css            # Tailwind layers + custom utilities (glass, scrollbars)
+data/tracks.ts       # track list + helpers (gradients, time formatting)
+components/
+  Browse.tsx         # Home: greeting, search, carousel, track list
+  NowPlaying.tsx     # full-screen player
+  MiniPlayer.tsx     # floating mini player
+  AlbumCover.tsx     # generated gradient cover
+  icons.tsx          # inline SVG icon set
+```
