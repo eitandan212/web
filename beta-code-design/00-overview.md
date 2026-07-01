@@ -40,6 +40,8 @@ gradients, dashboard clutter, oversized touch-style buttons, default-Tailwind lo
 
 ## 3. Document Map
 
+### Foundation & screens
+
 | File | Contents |
 |---|---|
 | `01-design-system.md` | Color tokens, typography, spacing/radius/elevation, iconography, core component specs (buttons, inputs, cards, modals, tables, etc.) |
@@ -54,6 +56,30 @@ gradients, dashboard clutter, oversized touch-style buttons, default-Tailwind lo
 | `10-settings-and-providers.md` | Settings sections; AI provider management (OpenAI, Anthropic, Google, NVIDIA, Ollama, GLM, Qwen, DeepSeek, local) |
 | `11-project-management.md` | Project overview, dependencies, build status, timeline, docs, architecture |
 | `12-motion-system.md` | Micro-interaction catalogue and timing/easing tokens |
+
+### Product layer
+
+| File | Contents |
+|---|---|
+| `13-user-flows.md` | End-to-end user journeys: open/create project, work with an agent, fix errors, install extensions, switch model, share workspace, git workflow |
+| `14-navigation-map.md` | Full sitemap, shell/mode/overlay distinctions, entry points, back/forward semantics |
+| `15-design-principles.md` | The ten hard rules every screen and decision is checked against |
+| `16-accessibility.md` | Keyboard navigation, contrast, screen reader support, focus states, text scaling |
+| `17-shortcuts.md` | Complete keyboard shortcut reference |
+| `18-empty-states.md` | Catalogue of every screen's empty state |
+| `19-error-handling.md` | AI/API/connection/provider/tool errors, verification failure, retry and undo semantics |
+| `20-notification-system.md` | Toasts, Notification Center, downloads, updates, interruption rules |
+| `21-agent-memory.md` | The four memory layers (context window, session, project, user) and their visible surfaces |
+| `22-file-system.md` | File status, ignored/hidden/large/binary file handling, search |
+| `23-terminal-experience.md` | Multiple terminals, split view, AI inline explanations, history, auto-fix |
+| `24-model-routing.md` | Manual and automatic model routing across providers, fallback behavior |
+| `25-brand-guidelines.md` | Name, logo, color/type as brand signal, tone of voice, motion signature |
+
+### Compass
+
+| File | Contents |
+|---|---|
+| `99-product-vision.md` | The vision, competitive positioning, non-negotiable principles, long-term feature horizon, and MVP → Beta → v1.0 → v2.0 roadmap. Read this first when a decision isn't covered elsewhere. |
 
 ## 4. How To Read The Screen Specs
 
