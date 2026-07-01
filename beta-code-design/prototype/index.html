@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beta Code — Interactive Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-canvas:#08090C; --bg-base:#0E1013; --bg-raised:#14161B; --bg-overlay:#1A1D23;
+  --bg-navy:#10131C;
+  --border-subtle:rgba(255,255,255,.06); --border-default:rgba(255,255,255,.10); --border-strong:rgba(255,255,255,.16);
+  --accent:#3D8BFF; --accent-muted:rgba(61,139,255,.14);
+  --accent2:#8B6BFF; --accent2-muted:rgba(139,107,255,.14);
+  --success:#39C589; --success-muted:rgba(57,197,137,.12);
+  --warning:#E8A94B; --warning-muted:rgba(232,169,75,.12);
+  --error:#EF5A5A; --error-muted:rgba(239,90,90,.12);
+  --text-primary:#F5F6F8; --text-secondary:rgba(245,246,248,.72); --text-tertiary:rgba(245,246,248,.48); --text-disabled:rgba(245,246,248,.28);
+  --r-sm:8px; --r-md:12px; --r-lg:14px; --r-xl:18px;
+  --fast:140ms; --base:220ms; --slow:360ms;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg-canvas); color:var(--text-primary);
+  font-family:'Inter',system-ui,-apple-system,sans-serif; font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+::selection{background:rgba(61,139,255,.35);}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+button{font-family:inherit;}
+mono, .mono{font-family:'JetBrains Mono',monospace;}
+a{color:inherit;}
+
+/* ---------- App shell ---------- */
+.app{display:flex; height:100vh; width:100vw; overflow:hidden;}
+
+/* Sidebar */
+.sidebar{
+  width:236px; min-width:236px; background:var(--bg-base); border-right:1px solid var(--border-subtle);
+  display:flex; flex-direction:column; padding:16px 12px; transition:width var(--slow) var(--ease), min-width var(--slow) var(--ease);
+}
+.sidebar.collapsed{width:64px; min-width:64px; padding:16px 8px;}
+.brand{display:flex; align-items:center; gap:10px; padding:6px 8px 18px; }
+.brand .mark{
+  width:26px; height:26px; flex:none; position:relative;
+}
+.brand .mark svg{width:100%;height:100%;}
+.brand .word{font-weight:700; font-size:15px; letter-spacing:-.01em; white-space:nowrap; overflow:hidden;}
+.sidebar.collapsed .word, .sidebar.collapsed .ws-name, .sidebar.collapsed .nav-label, .sidebar.collapsed .profile-name{display:none;}
+
+.ws-switcher{
+  display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:var(--r-md); cursor:pointer;
+  border:1px solid var(--border-subtle); background:var(--bg-raised); margin-bottom:14px; white-space:nowrap; overflow:hidden;
+}
+.ws-switcher:hover{border-color:var(--border-default);}
+.ws-avatar{width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,var(--accent),var(--accent2));flex:none;}
+.ws-name{font-size:13px; font-weight:600; flex:1; overflow:hidden; text-overflow:ellipsis;}
+.ws-switcher .chev{color:var(--text-tertiary); font-size:10px;}
+
+.search-btn{
+  display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:var(--r-md);
+  border:1px solid var(--border-subtle); background:transparent; color:var(--text-tertiary); font-size:13px;
+  cursor:pointer; margin-bottom:14px; width:100%; white-space:nowrap; overflow:hidden;
+}
+.search-btn:hover{background:var(--bg-raised); color:var(--text-secondary);}
+.search-btn kbd{margin-left:auto; font-size:11px; background:var(--bg-raised); border:1px solid var(--border-subtle); border-radius:5px; padding:1px 5px; color:var(--text-tertiary);}
+.sidebar.collapsed .search-btn kbd, .sidebar.collapsed .ws-switcher .chev{display:none;}
+
+.nav{display:flex; flex-direction:column; gap:2px;}
+.nav-item{
+  display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:var(--r-md); cursor:pointer;
+  color:var(--text-secondary); font-size:13px; font-weight:500; position:relative; transition:background var(--fast), color var(--fast);
+  white-space:nowrap; overflow:hidden;
+}
+.nav-item:hover{background:var(--bg-raised); color:var(--text-primary);}
+.nav-item.active{background:var(--accent-muted); color:var(--text-primary);}
+.nav-item.active::before{content:""; position:absolute; left:-12px; top:50%; transform:translateY(-50%); width:2px; height:20px; background:var(--accent); border-radius:2px;}
+.sidebar.collapsed .nav-item.active::before{left:-8px;}
+.nav-item svg{flex:none; width:18px;height:18px;}
+.nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:auto;}
+.nav-spacer{flex:1;}
+.nav-foot{border-top:1px solid var(--border-subtle); padding-top:10px; margin-top:8px; display:flex; flex-direction:column; gap:2px;}
+.profile{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--r-md); cursor:pointer;}
+.profile:hover{background:var(--bg-raised);}
+.profile-avatar{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#5FA8FF,#8B6BFF);flex:none;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.profile-name{font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.collapse-btn{
+  margin-top:6px; display:flex; align-items:center; justify-content:center; gap:6px; padding:7px; border-radius:var(--r-md);
+  color:var(--text-tertiary); cursor:pointer; font-size:12px; border:1px solid transparent;
+}
+.collapse-btn:hover{background:var(--bg-raised); color:var(--text-secondary);}
+
+/* Center workspace */
+.workspace{flex:1; display:flex; flex-direction:column; min-width:0; background:var(--bg-canvas); position:relative;}
+.titlebar{
+  height:52px; flex:none; display:flex; align-items:center; padding:0 20px; border-bottom:1px solid var(--border-subtle);
+  gap:14px; background:var(--bg-base);
+}
+.breadcrumb{font-size:13px; color:var(--text-tertiary); display:flex; align-items:center; gap:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.breadcrumb b{color:var(--text-primary); font-weight:600;}
+.titlebar-actions{margin-left:auto; display:flex; gap:8px;}
+
+.content{flex:1; overflow-y:auto; position:relative;}
+.view{display:none; height:100%;}
+.view.active{display:block;}
+
+/* Buttons */
+.btn{
+  display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border-radius:var(--r-md);
+  font-size:13px; font-weight:600; cursor:pointer; border:1px solid transparent; transition:all var(--fast);
+  white-space:nowrap;
+}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--accent); color:#08090C;}
+.btn-primary:hover{background:#5B9EFF;}
+.btn-secondary{background:transparent; border-color:var(--border-default); color:var(--text-primary);}
+.btn-secondary:hover{background:var(--bg-raised);}
+.btn-ghost{background:transparent; color:var(--text-secondary);}
+.btn-ghost:hover{color:var(--text-primary); background:var(--bg-raised);}
+.btn-sm{height:28px; padding:0 10px; font-size:12px;}
+.btn-icon{width:32px; height:32px; padding:0; justify-content:center; background:transparent; color:var(--text-secondary); border-radius:var(--r-md);}
+.btn-icon:hover{background:var(--bg-raised); color:var(--text-primary);}
+.badge{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:var(--r-sm);}
+.badge-neutral{background:var(--bg-raised); color:var(--text-secondary); border:1px solid var(--border-subtle);}
+.badge-success{background:var(--success-muted); color:var(--success);}
+.badge-warning{background:var(--warning-muted); color:var(--warning);}
+.badge-error{background:var(--error-muted); color:var(--error);}
+.badge-accent{background:var(--accent-muted); color:var(--accent);}
+.badge .live-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+/* ---------- Dashboard ---------- */
+.dash{max-width:900px; margin:0 auto; padding:48px 32px 120px;}
+.dash-greet{font-size:30px; font-weight:700; letter-spacing:-.01em; margin:0 0 6px;}
+.dash-sub{color:var(--text-secondary); margin:0 0 20px; font-size:15px;}
+.section{margin-top:40px;}
+.section-head{display:flex; align-items:center; margin-bottom:14px;}
+.section-title{font-size:14px; font-weight:600; color:var(--text-primary);}
+.section-head a{margin-left:auto; font-size:12px; color:var(--text-tertiary); cursor:pointer;}
+.section-head a:hover{color:var(--text-secondary);}
+.row-scroll{display:flex; gap:12px; overflow-x:auto; padding-bottom:4px;}
+.card{background:var(--bg-raised); border:1px solid var(--border-default); border-radius:var(--r-lg); box-shadow:0 1px 2px rgba(0,0,0,.4);}
+.proj-card{width:220px; flex:none; padding:16px; cursor:pointer; transition:border-color var(--fast);}
+.proj-card:hover{border-color:var(--border-strong);}
+.proj-card .name{font-weight:600; font-size:13.5px; margin-bottom:8px;}
+.proj-card .meta{display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;}
+.proj-card .health{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-tertiary);}
+.proj-card .health .d{width:6px;height:6px;border-radius:50%;}
+.proj-new{width:220px; flex:none; border:1px dashed var(--border-default); border-radius:var(--r-lg); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px; color:var(--text-tertiary); cursor:pointer; height:106px;}
+.proj-new:hover{color:var(--text-secondary); border-color:var(--border-strong);}
+
+.list-row{display:flex; align-items:center; gap:12px; padding:10px 4px; border-radius:var(--r-md); cursor:pointer;}
+.list-row:hover{background:var(--bg-raised);}
+.list-row .lr-title{font-size:13px; font-weight:500; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.list-row .lr-meta{font-size:12px; color:var(--text-tertiary); flex:none;}
+
+.suggest-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.suggest-card{padding:14px 16px; cursor:pointer; font-size:13px; display:flex; flex-direction:column; gap:6px;}
+.suggest-card:hover{border-color:var(--border-strong);}
+.suggest-card .src{font-size:11px; color:var(--text-tertiary);}
+
+.quick-row{display:flex; gap:10px; flex-wrap:wrap;}
+
+/* Agent card (shared) */
+.agent-card{padding:14px 16px; width:280px; flex:none;}
+.agent-card.wide{width:auto;}
+.ac-head{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+.chip{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:none; font-size:11px;}
+.ac-name{font-weight:600; font-size:13px; flex:1;}
+.ac-task{font-size:12.5px; color:var(--text-secondary); margin-bottom:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.progress{height:4px; background:var(--bg-base); border-radius:8px; overflow:hidden; margin-bottom:8px;}
+.progress > div{height:100%; background:var(--accent); border-radius:8px; transition:width .6s var(--ease);}
+.ac-foot{display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-tertiary);}
+.ac-controls{display:flex; gap:6px; margin-top:10px;}
+
+/* Composer */
+.composer-dock{
+  border-top:1px solid var(--border-subtle); background:var(--bg-base); padding:14px 24px; flex:none;
+}
+.composer{
+  max-width:900px; margin:0 auto; background:var(--bg-raised); border:1px solid var(--border-default); border-radius:var(--r-lg);
+  padding:12px 14px; transition:border-color var(--fast);
+}
+.composer:focus-within{border-color:var(--border-strong); box-shadow:0 0 0 1px var(--accent) inset;}
+.composer textarea{
+  width:100%; background:transparent; border:none; outline:none; resize:none; color:var(--text-primary);
+  font-family:inherit; font-size:14px; min-height:22px; max-height:140px;
+}
+.composer textarea::placeholder{color:var(--text-tertiary);}
+.composer-foot{display:flex; align-items:center; margin-top:8px; gap:8px;}
+.model-badge{
+  display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:4px 10px; border-radius:var(--r-sm);
+  background:var(--bg-base); border:1px solid var(--border-subtle); color:var(--text-secondary); cursor:pointer; margin-left:auto;
+}
+.model-badge:hover{border-color:var(--border-default);}
+.run-btn{display:flex; align-items:center; gap:6px; height:30px; padding:0 12px; border-radius:var(--r-md); background:var(--accent); color:#08090C; font-weight:600; font-size:12.5px; cursor:pointer; border:none;}
+.run-btn:hover{background:#5B9EFF;}
+.run-btn:disabled{background:var(--bg-raised); color:var(--text-disabled); cursor:default;}
+.run-btn.stop{background:transparent; border:1px solid var(--error); color:var(--error);}
+
+/* Execution workspace / turns */
+.thread{max-width:820px; margin:0 auto; padding:32px 32px 140px;}
+.turn{padding-bottom:36px; border-bottom:1px solid var(--border-subtle); margin-bottom:36px;}
+.turn:last-child{border-bottom:none;}
+.turn-user{display:flex; gap:10px; margin-bottom:22px; align-items:flex-start;}
+.turn-user .av{width:24px;height:24px;border-radius:7px;background:var(--bg-raised); border:1px solid var(--border-default); flex:none; display:flex;align-items:center;justify-content:center; font-size:11px; font-weight:700;}
+.turn-user .u-text{font-size:14.5px; padding-top:2px;}
+.turn-ai-head{display:flex; align-items:center; gap:10px; margin-bottom:16px;}
+.turn-ai-head .mark-sm{width:20px;height:20px;}
+.turn-ai-head .name{font-weight:600; font-size:13.5px;}
+.phase-dots{display:flex; gap:5px; margin-left:auto;}
+.phase-dots .pd{width:7px;height:7px;border-radius:50%; background:var(--border-default); transition:background var(--slow);}
+.phase-dots .pd.done{background:var(--success);}
+.phase-dots .pd.active{background:var(--accent); box-shadow:0 0 0 3px var(--accent-muted);}
+
+.block{margin-bottom:16px;}
+.block-toggle{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-tertiary); cursor:pointer; margin-bottom:8px; user-select:none;}
+.block-toggle .chev{transition:transform var(--fast); font-size:10px;}
+.block-toggle.collapsed .chev{transform:rotate(-90deg);}
+.reasoning-box{
+  background:var(--accent2-muted); border-radius:var(--r-md); padding:12px 14px; font-family:'JetBrains Mono',monospace; font-style:italic;
+  font-size:12.5px; color:var(--text-secondary); line-height:1.6; overflow:hidden; max-height:400px; transition:max-height var(--base);
+}
+.reasoning-box.collapsed{max-height:0; padding-top:0; padding-bottom:0;}
+.plan-list{list-style:none; margin:0; padding:0; background:var(--bg-raised); border:1px solid var(--border-default); border-radius:var(--r-md); overflow:hidden;}
+.plan-list li{display:flex; align-items:center; gap:10px; padding:10px 14px; font-size:13px; border-bottom:1px solid var(--border-subtle);}
+.plan-list li:last-child{border-bottom:none;}
+.plan-glyph{width:16px;height:16px;flex:none; border-radius:50%; border:1.5px solid var(--border-default); display:flex;align-items:center;justify-content:center;}
+.plan-glyph.spin{border:1.5px solid var(--border-default); border-top-color:var(--accent); animation:spin .8s linear infinite;}
+.plan-glyph.done{background:var(--success); border-color:var(--success);}
+.plan-glyph.done::after{content:"✓"; font-size:9px; color:#08090C; font-weight:700;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.confirm-bar{display:flex; align-items:center; gap:12px; background:var(--bg-raised); border:1px solid var(--border-default); border-radius:var(--r-md); padding:10px 14px; margin-top:10px; font-size:13px; color:var(--text-secondary);}
+.confirm-bar .actions{margin-left:auto; display:flex; gap:8px;}
+
+.toolcard{background:var(--bg-raised); border:1px solid var(--border-default); border-radius:var(--r-md); margin-bottom:6px; overflow:hidden; cursor:pointer;}
+.toolcard.error{border-left:3px solid var(--error);}
+.tc-row{display:flex; align-items:center; gap:10px; padding:9px 12px;}
+.tc-icon{width:26px;height:26px;border-radius:var(--r-sm); display:flex;align-items:center;justify-content:center; flex:none; font-size:13px;}
+.tc-name{font-weight:600; font-size:12.5px; flex:none;}
+.tc-input{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-secondary); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:rtl; text-align:left;}
+.tc-status{margin-left:auto; display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-tertiary); flex:none;}
+.tc-body{max-height:0; overflow:hidden; transition:max-height var(--base) var(--ease); border-top:1px solid var(--border-subtle);}
+.toolcard.open .tc-body{max-height:260px; overflow-y:auto;}
+.tc-body-inner{padding:12px; font-size:12px;}
+.tc-code{background:var(--bg-navy); border:1px solid var(--border-subtle); border-radius:var(--r-sm); padding:10px 12px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.7; color:var(--text-secondary); overflow-x:auto; white-space:pre;}
+.diff-add{background:rgba(57,197,137,.10); color:#a7e9cd;}
+.diff-rm{background:rgba(239,90,90,.10); color:#f3aaaa; text-decoration:line-through; opacity:.7;}
+
+.verify-line{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--success); margin-bottom:16px;}
+.completion-text{font-size:14.5px; color:var(--text-primary); line-height:1.7; margin-bottom:16px;}
+.turn-actions{display:flex; align-items:center; gap:14px; margin-top:16px; font-size:12px; color:var(--text-tertiary);}
+.turn-actions span{cursor:pointer; display:flex; align-items:center; gap:5px;}
+.turn-actions span:hover{color:var(--text-secondary);}
+
+.cold-start{display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:20px;}
+.cold-start .mark{width:44px;height:44px; margin-bottom:18px; opacity:.9;}
+.cold-start h1{font-size:24px; font-weight:700; margin:0 0 24px;}
+.suggest-mini{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:640px; margin-bottom:8px;}
+.suggest-mini .card{padding:10px 14px; font-size:12.5px; cursor:pointer; color:var(--text-secondary);}
+.suggest-mini .card:hover{border-color:var(--border-strong); color:var(--text-primary);}
+
+/* Right panel */
+.context-panel{width:320px; min-width:320px; background:var(--bg-base); border-left:1px solid var(--border-subtle); display:flex; flex-direction:column; transition:width var(--base) var(--ease), min-width var(--base) var(--ease);}
+.context-panel.collapsed{width:52px; min-width:52px;}
+.cp-tabs{display:flex; border-bottom:1px solid var(--border-subtle); padding:10px 12px 0; gap:14px; overflow-x:auto; flex:none;}
+.context-panel.collapsed .cp-tabs{display:none;}
+.cp-tab{padding-bottom:10px; font-size:12.5px; color:var(--text-tertiary); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;}
+.cp-tab.active{color:var(--text-primary); border-color:var(--accent);}
+.cp-body{flex:1; overflow-y:auto; padding:14px;}
+.context-panel.collapsed .cp-body{display:none;}
+.cp-collapse-rail{display:none;}
+.context-panel.collapsed .cp-collapse-rail{display:flex; flex-direction:column; align-items:center; gap:14px; padding-top:14px;}
+.cp-empty{color:var(--text-tertiary); font-size:12.5px; text-align:center; margin-top:40px; padding:0 10px;}
+.tree-row{display:flex; align-items:center; gap:6px; padding:4px 4px; font-size:12.5px; border-radius:6px; cursor:pointer;}
+.tree-row:hover{background:var(--bg-raised);}
+.tree-row .indent{width:14px; flex:none;}
+.tree-row .fdot{width:6px;height:6px;border-radius:50%; margin-left:auto; flex:none;}
+.file-icon{width:14px;color:var(--text-tertiary); flex:none;}
+.term-mini{background:var(--bg-navy); border:1px solid var(--border-subtle); border-radius:var(--r-sm); padding:10px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text-secondary); line-height:1.7;}
+.env-row{display:flex; justify-content:space-between; font-size:12.5px; padding:7px 0; border-bottom:1px solid var(--border-subtle);}
+.env-row .k{color:var(--text-tertiary);}
+
+/* Agents screen */
+.page{max-width:1000px; margin:0 auto; padding:32px;}
+.page-head{display:flex; align-items:baseline; gap:14px; margin-bottom:6px;}
+.page-title{font-size:20px; font-weight:700;}
+.page-sub{color:var(--text-tertiary); font-size:13px; margin-bottom:24px;}
+.card-grid{display:flex; gap:12px; flex-wrap:wrap;}
+.orchestration{display:flex; align-items:center; gap:0; margin:20px 0; overflow-x:auto; padding:20px 4px;}
+.orch-node{display:flex; flex-direction:column; align-items:center; gap:8px; flex:none; width:120px;}
+.orch-chip{width:36px;height:36px;border-radius:10px; display:flex;align-items:center;justify-content:center; font-size:14px; border:2px solid var(--border-default);}
+.orch-chip.done{border-color:var(--success); background:var(--success-muted);}
+.orch-chip.active{border-color:var(--accent); background:var(--accent-muted); box-shadow:0 0 0 4px var(--accent-muted);}
+.orch-label{font-size:11.5px; color:var(--text-secondary); text-align:center;}
+.orch-state{font-size:10.5px; color:var(--text-tertiary);}
+.orch-line{flex:1; height:2px; background:var(--accent2); min-width:24px; margin-top:-24px;}
+
+/* Marketplace */
+.tabs-row{display:flex; gap:22px; border-bottom:1px solid var(--border-subtle); margin-bottom:20px;}
+.tab-item{padding-bottom:10px; font-size:13px; color:var(--text-tertiary); cursor:pointer; border-bottom:2px solid transparent;}
+.tab-item.active{color:var(--text-primary); border-color:var(--accent);}
+.market-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px;}
+.item-card{overflow:hidden; cursor:pointer;}
+.item-card .thumb{height:100px; background:linear-gradient(135deg,var(--bg-navy),var(--bg-raised)); display:flex; align-items:center; justify-content:center; font-size:26px;}
+.item-card .body{padding:12px 14px;}
+.item-card .t{font-weight:600; font-size:13px; margin-bottom:4px;}
+.item-card .d{font-size:12px; color:var(--text-secondary); margin-bottom:10px; height:32px; overflow:hidden;}
+.item-card .meta-row{display:flex; align-items:center; font-size:11px; color:var(--text-tertiary); margin-bottom:10px;}
+
+/* Settings */
+.settings-layout{display:flex; height:100%;}
+.settings-rail{width:200px; flex:none; border-right:1px solid var(--border-subtle); padding:20px 10px;}
+.settings-rail .nav-item{font-size:12.5px;}
+.settings-content{flex:1; overflow-y:auto; padding:32px 40px; max-width:720px;}
+.provider-row{padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:12px;}
+.provider-row .mark{width:32px;height:32px;border-radius:9px; display:flex;align-items:center;justify-content:center; font-size:14px; flex:none;}
+.provider-row .info{flex:1;}
+.provider-row .pname{font-weight:600; font-size:13.5px;}
+.provider-row .pmodels{font-size:12px; color:var(--text-tertiary);}
+
+/* Command Palette */
+.palette-scrim{position:fixed; inset:0; background:rgba(4,5,7,.6); display:none; align-items:flex-start; justify-content:center; z-index:200; padding-top:12vh;}
+.palette-scrim.open{display:flex;}
+.palette{width:600px; max-width:92vw; background:rgba(20,22,27,.85); backdrop-filter:blur(20px) saturate(180%); border:1px solid var(--border-default); border-radius:var(--r-xl); box-shadow:0 24px 64px rgba(0,0,0,.55); overflow:hidden;}
+.palette-input{display:flex; align-items:center; gap:10px; padding:16px 18px; border-bottom:1px solid var(--border-subtle);}
+.palette-input input{flex:1; background:transparent; border:none; outline:none; color:var(--text-primary); font-size:16px;}
+.palette-input input::placeholder{color:var(--text-tertiary);}
+.palette-results{max-height:360px; overflow-y:auto; padding:8px;}
+.palette-group{font-size:11px; font-weight:600; color:var(--text-tertiary); letter-spacing:.05em; text-transform:uppercase; padding:10px 10px 6px;}
+.palette-row{display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:var(--r-sm); font-size:13px; cursor:pointer;}
+.palette-row:hover, .palette-row.sel{background:var(--bg-raised);}
+.palette-row .pr-icon{width:16px; color:var(--text-tertiary); flex:none;}
+.palette-row .pr-meta{margin-left:auto; font-size:11px; color:var(--text-tertiary);}
+
+/* Toasts */
+.toast-stack{position:fixed; bottom:20px; right:20px; display:flex; flex-direction:column; gap:8px; z-index:300; width:320px;}
+.toast{background:rgba(20,22,27,.9); backdrop-filter:blur(16px); border:1px solid var(--border-default); border-radius:var(--r-lg); padding:12px 14px; display:flex; gap:10px; box-shadow:0 8px 24px rgba(0,0,0,.45); animation:toastIn var(--base) var(--ease);}
+@keyframes toastIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+.toast .ti{flex:none; margin-top:1px;}
+.toast .tt{font-size:12.5px; font-weight:600; margin-bottom:2px;}
+.toast .td{font-size:12px; color:var(--text-secondary);}
+
+.hint-banner{position:fixed; top:0; left:0; right:0; background:rgba(232,169,75,.12); color:var(--warning); font-size:12px; text-align:center; padding:6px; z-index:150; display:none; border-bottom:1px solid var(--border-subtle);}
+
+svg{display:block;}
+</style>
+</head>
+<body>
+
+<div class="hint-banner" id="hintBanner">This is a simulated prototype — no real AI/network calls are made.</div>
+
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2 L21 12 L12 22 L3 12 Z" stroke="#3D8BFF" stroke-width="1.6" fill="rgba(61,139,255,.12)"/><path d="M9 8 L5 12 L9 16 M15 8 L19 12 L15 16" stroke="#3D8BFF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="word">Beta Code</div>
+    </div>
+
+    <div class="ws-switcher">
+      <div class="ws-avatar"></div>
+      <div class="ws-name">Personal Workspace</div>
+      <div class="chev">▾</div>
+    </div>
+
+    <button class="search-btn" onclick="openPalette()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <span>Search…</span>
+      <kbd>⌘K</kbd>
+    </button>
+
+    <nav class="nav">
+      <div class="nav-item active" data-mode="dashboard" onclick="setMode('dashboard')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+        <span class="nav-label">Dashboard</span>
+      </div>
+      <div class="nav-item" data-mode="projects" onclick="setMode('projects')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+        <span class="nav-label">Projects</span>
+      </div>
+      <div class="nav-item" data-mode="agents" onclick="setMode('agents')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 10h.01M15 10h.01M9 15c1 1 5 1 6 0"/></svg>
+        <span class="nav-label">Agents</span>
+        <span class="dot" id="agentsDot" style="display:none;"></span>
+      </div>
+      <div class="nav-item" data-mode="skills" onclick="setMode('skills')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M19 11h-2.5a2.5 2.5 0 1 1 0-5H19V4h-2.5a2.5 2.5 0 1 1 0-5"/><path d="M5 13v6a2 2 0 0 0 2 2h6" transform="translate(0 0)"/></svg>
+        <span class="nav-label">Skills</span>
+      </div>
+      <div class="nav-item" data-mode="tasks" onclick="setMode('tasks')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span class="nav-label">Tasks</span>
+      </div>
+      <div class="nav-item" data-mode="history" onclick="setMode('history')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        <span class="nav-label">History</span>
+      </div>
+      <div class="nav-item" data-mode="marketplace" onclick="setMode('marketplace')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 13a3 3 0 0 0 6 0"/></svg>
+        <span class="nav-label">Marketplace</span>
+      </div>
+      <div class="nav-spacer"></div>
+      <div class="nav-foot">
+        <div class="nav-item" data-mode="settings" onclick="setMode('settings')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1Z"/></svg>
+          <span class="nav-label">Settings</span>
+        </div>
+        <div class="profile">
+          <div class="profile-avatar">T</div>
+          <div class="profile-name">Tomer</div>
+        </div>
+        <div class="collapse-btn" onclick="toggleSidebar()">⟨ ⟩</div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ===================== CENTER WORKSPACE ===================== -->
+  <main class="workspace">
+    <div class="titlebar">
+      <div class="breadcrumb" id="breadcrumb"><b>Personal Workspace</b> ▸ Dashboard</div>
+      <div class="titlebar-actions">
+        <button class="btn-icon" title="Notifications" onclick="pushToast('success','You\'re all caught up','No new notifications right now.')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="content" id="content">
+
+      <!-- DASHBOARD -->
+      <div class="view active" id="view-dashboard">
+        <div class="dash">
+          <h1 class="dash-greet">Good afternoon, Tomer</h1>
+          <p class="dash-sub">What are we building today?</p>
+
+          <div class="section" style="margin-top:0;">
+            <div class="row-scroll" id="runningNow"></div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Pinned workspaces</div><a>See all</a></div>
+            <div class="row-scroll">
+              <div class="proj-card" onclick="openProject('beta-code-web')">
+                <div class="name">beta-code-web</div>
+                <div class="meta"><span class="badge badge-neutral">TypeScript</span><span class="badge badge-neutral">React</span></div>
+                <div class="health"><span class="d" style="background:var(--success)"></span>Build passing</div>
+              </div>
+              <div class="proj-card" onclick="openProject('pulse')">
+                <div class="name">pulse</div>
+                <div class="meta"><span class="badge badge-neutral">Vite</span><span class="badge badge-neutral">Tailwind</span></div>
+                <div class="health"><span class="d" style="background:var(--warning)"></span>2 tests failing</div>
+              </div>
+              <div class="proj-card" onclick="openProject('infra-tools')">
+                <div class="name">infra-tools</div>
+                <div class="meta"><span class="badge badge-neutral">Go</span></div>
+                <div class="health"><span class="d" style="background:var(--success)"></span>Build passing</div>
+              </div>
+              <div class="proj-new">+ New Project</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Recent conversations</div><a>See all</a></div>
+            <div class="list-row" onclick="resumeSession()">
+              <div class="lr-title">Rate limiting for /login</div>
+              <div class="lr-meta">beta-code-web · 2h ago</div>
+            </div>
+            <div class="list-row">
+              <div class="lr-title">Refactor AlbumCover into hooks</div>
+              <div class="lr-meta">pulse · yesterday</div>
+            </div>
+            <div class="list-row">
+              <div class="lr-title">Investigate flaky CI test</div>
+              <div class="lr-meta">infra-tools · 2d ago</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Suggested actions</div></div>
+            <div class="suggest-grid">
+              <div class="card suggest-card" onclick="seedPrompt('Fix the 2 failing tests in pulse')">
+                <div>Fix 2 failing tests in pulse</div>
+                <div class="src">pulse</div>
+              </div>
+              <div class="card suggest-card" onclick="seedPrompt('Review open PR #142 and summarize the changes')">
+                <div>Review open PR #142</div>
+                <div class="src">beta-code-web</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head"><div class="section-title">Quick launch</div></div>
+            <div class="quick-row">
+              <button class="btn btn-secondary" onclick="pushToast('accent','New Project','This would open the New Project modal.')">＋ New Project</button>
+              <button class="btn btn-secondary" onclick="pushToast('accent','Open Folder','This would open a native folder picker.')">📁 Open Folder</button>
+              <button class="btn btn-secondary" onclick="pushToast('accent','Clone Repo','This would prompt for a repository URL.')">⎘ Clone Repo</button>
+              <button class="btn btn-secondary" onclick="setMode('agents'); launchAgentDemo();">▶ Launch Agent</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXECUTION WORKSPACE -->
+      <div class="view" id="view-exec">
+        <div class="thread" id="thread"></div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="view" id="view-projects">
+        <div class="page">
+          <div class="page-head"><div class="page-title">Projects</div></div>
+          <div class="page-sub">All your workspaces in one place.</div>
+          <div class="card-grid">
+            <div class="proj-card" onclick="openProject('beta-code-web')"><div class="name">beta-code-web</div><div class="meta"><span class="badge badge-neutral">TypeScript</span></div><div class="health"><span class="d" style="background:var(--success)"></span>Build passing</div></div>
+            <div class="proj-card" onclick="openProject('pulse')"><div class="name">pulse</div><div class="meta"><span class="badge badge-neutral">Vite</span></div><div class="health"><span class="d" style="background:var(--warning)"></span>2 tests failing</div></div>
+            <div class="proj-card" onclick="openProject('infra-tools')"><div class="name">infra-tools</div><div class="meta"><span class="badge badge-neutral">Go</span></div><div class="health"><span class="d" style="background:var(--success)"></span>Build passing</div></div>
+            <div class="proj-new">+ New Project</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AGENTS -->
+      <div class="view" id="view-agents">
+        <div class="page">
+          <div class="page-head"><div class="page-title">Agents</div></div>
+          <div class="page-sub" id="agentsSub">No agents running</div>
+          <div class="card-grid" id="agentsGrid"></div>
+
+          <div class="section" id="orchSection" style="display:none;">
+            <div class="section-title" style="margin-bottom:6px;">Orchestration</div>
+            <div class="card" style="padding:8px 16px;">
+              <div class="orchestration" id="orchRow"></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title" style="margin-bottom:12px;">Available agent types</div>
+            <div class="card-grid" id="agentTypesGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SKILLS -->
+      <div class="view" id="view-skills">
+        <div class="page">
+          <div class="page-head"><div class="page-title">Skills</div></div>
+          <div class="page-sub">Installed skills that extend what agents can do.</div>
+          <div class="card-grid">
+            <div class="card" style="padding:14px 16px; width:240px;"><b style="font-size:13px;">Test Generator</b><div style="color:var(--text-tertiary); font-size:12px; margin-top:6px;">Enabled</div></div>
+            <div class="card" style="padding:14px 16px; width:240px;"><b style="font-size:13px;">Changelog Writer</b><div style="color:var(--text-tertiary); font-size:12px; margin-top:6px;">Enabled</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TASKS -->
+      <div class="view" id="view-tasks">
+        <div class="page">
+          <div class="page-head"><div class="page-title">Tasks</div></div>
+          <div class="page-sub">Open items across every project.</div>
+          <div class="card" style="padding:6px;">
+            <div class="list-row"><input type="checkbox"> <div class="lr-title">Add rate limiting to /login</div><div class="lr-meta">beta-code-web</div></div>
+            <div class="list-row"><input type="checkbox"> <div class="lr-title">Fix flaky CI test</div><div class="lr-meta">infra-tools</div></div>
+            <div class="list-row"><input type="checkbox" checked> <div class="lr-title" style="text-decoration:line-through; color:var(--text-tertiary);">Update README</div><div class="lr-meta">pulse</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="view" id="view-history">
+        <div class="page">
+          <div class="page-head"><div class="page-title">History</div></div>
+          <div class="page-sub">Every session, across every project.</div>
+          <div class="list-row" onclick="resumeSession()"><div class="lr-title">Rate limiting for /login</div><div class="lr-meta">beta-code-web · 2h ago</div></div>
+          <div class="list-row"><div class="lr-title">Refactor AlbumCover into hooks</div><div class="lr-meta">pulse · yesterday</div></div>
+          <div class="list-row"><div class="lr-title">Investigate flaky CI test</div><div class="lr-meta">infra-tools · 2d ago</div></div>
+        </div>
+      </div>
+
+      <!-- MARKETPLACE -->
+      <div class="view" id="view-marketplace">
+        <div class="page">
+          <div class="page-head"><div class="page-title">Marketplace</div></div>
+          <div class="tabs-row">
+            <div class="tab-item active">Agents</div>
+            <div class="tab-item">Skills</div>
+            <div class="tab-item">Templates</div>
+            <div class="tab-item">Workflows</div>
+            <div class="tab-item">Themes</div>
+            <div class="tab-item">Extensions</div>
+          </div>
+          <div class="market-grid">
+            <div class="card item-card" onclick="installItem(this,'Testing Pro')">
+              <div class="thumb">🧪</div>
+              <div class="body">
+                <div class="t">Testing Pro</div>
+                <div class="d">Automated test generation and flaky-test triage</div>
+                <div class="meta-row">★ 4.8 (212) · v2.3</div>
+                <button class="btn btn-secondary btn-sm install-btn">Install</button>
+              </div>
+            </div>
+            <div class="card item-card" onclick="installItem(this,'Security Auditor')">
+              <div class="thumb">🛡️</div>
+              <div class="body">
+                <div class="t">Security Auditor</div>
+                <div class="d">Scans for common vulnerabilities before merge</div>
+                <div class="meta-row">★ 4.6 (98) · v1.4</div>
+                <button class="btn btn-secondary btn-sm install-btn">Install</button>
+              </div>
+            </div>
+            <div class="card item-card" onclick="installItem(this,'Midnight Theme')">
+              <div class="thumb">🎨</div>
+              <div class="body">
+                <div class="t">Midnight Theme</div>
+                <div class="d">A deeper contrast variant of the default theme</div>
+                <div class="meta-row">★ 4.9 (54) · v1.0</div>
+                <button class="btn btn-secondary btn-sm install-btn">Install</button>
+              </div>
+            </div>
+            <div class="card item-card" onclick="installItem(this,'Docs Writer')">
+              <div class="thumb">📝</div>
+              <div class="body">
+                <div class="t">Docs Writer</div>
+                <div class="d">Keeps README and docs in sync with code changes</div>
+                <div class="meta-row">★ 4.7 (140) · v3.1</div>
+                <button class="btn btn-secondary btn-sm install-btn">Install</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="view" id="view-settings">
+        <div class="settings-layout">
+          <div class="settings-rail">
+            <div class="nav-item active">General</div>
+            <div class="nav-item">Appearance</div>
+            <div class="nav-item active" style="background:var(--accent-muted);">Models &amp; Providers</div>
+            <div class="nav-item">Agents</div>
+            <div class="nav-item">Skills</div>
+            <div class="nav-item">Workspace</div>
+            <div class="nav-item">Editor</div>
+            <div class="nav-item">Terminal</div>
+            <div class="nav-item">Notifications</div>
+            <div class="nav-item">Privacy</div>
+            <div class="nav-item">Updates</div>
+            <div class="nav-item">Advanced</div>
+            <div class="nav-item">About</div>
+          </div>
+          <div class="settings-content">
+            <h2 style="margin:0 0 4px; font-size:20px;">Providers</h2>
+            <p style="color:var(--text-secondary); margin:0 0 20px; font-size:13px;">Manage the AI providers Beta Code can use.</p>
+
+            <div style="margin-bottom:16px; font-size:12.5px; color:var(--text-secondary);">
+              Default model for new sessions: <span class="badge badge-accent" style="margin-left:6px;">Claude Sonnet 5 ▾</span>
+            </div>
+
+            <div class="card provider-row"><div class="mark" style="background:#3D8BFF22; color:#3D8BFF;">🟣</div><div class="info"><div class="pname">Anthropic</div><div class="pmodels">Claude Sonnet 5, Opus 4.8</div></div><span class="badge badge-success"><span class="live-dot"></span>Active</span><button class="btn-icon">⚙</button></div>
+            <div class="card provider-row"><div class="mark" style="background:#39C58922; color:#39C589;">⚪</div><div class="info"><div class="pname">OpenAI</div><div class="pmodels">GPT-5.x</div></div><span class="badge badge-success"><span class="live-dot"></span>Active</span><button class="btn-icon">⚙</button></div>
+            <div class="card provider-row"><div class="mark" style="background:#E8A94B22; color:#E8A94B;">🔵</div><div class="info"><div class="pname">Google</div><div class="pmodels">Not configured</div></div><button class="btn btn-secondary btn-sm">Add API key</button></div>
+            <div class="card provider-row"><div class="mark" style="background:#8B6BFF22; color:#8B6BFF;">🟢</div><div class="info"><div class="pname">GLM</div><div class="pmodels">Not configured</div></div><button class="btn btn-secondary btn-sm">Add API key</button></div>
+            <div class="card provider-row"><div class="mark" style="background:#EF5A5A22; color:#EF5A5A;">🟠</div><div class="info"><div class="pname">DeepSeek</div><div class="pmodels">Not configured</div></div><button class="btn btn-secondary btn-sm">Add API key</button></div>
+            <div class="card provider-row"><div class="mark" style="background:#8FA3B822; color:#8FA3B8;">💻</div><div class="info"><div class="pname">Local models</div><div class="pmodels">Detected: 2 local models</div></div><span class="badge badge-neutral">Configured</span><button class="btn-icon">⚙</button></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COMPOSER -->
+    <div class="composer-dock" id="composerDock">
+      <div class="composer">
+        <textarea id="composerInput" rows="1" placeholder="Ask Beta Code to build, fix, or explain anything…" onkeydown="composerKey(event)" oninput="autoGrow(this)"></textarea>
+        <div class="composer-foot">
+          <button class="btn-icon" title="Attach" style="width:26px;height:26px;">📎</button>
+          <div class="model-badge" onclick="pushToast('accent','Model switcher','Would open the model picker inline.')">Claude Sonnet 5 ▾</div>
+          <button class="run-btn" id="runBtn" onclick="submitPrompt()">Run ⏎</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== RIGHT CONTEXT PANEL ===================== -->
+  <aside class="context-panel" id="contextPanel">
+    <div class="cp-tabs" id="cpTabs">
+      <div class="cp-tab active" data-tab="files" onclick="setCpTab('files')">Files</div>
+      <div class="cp-tab" data-tab="terminal" onclick="setCpTab('terminal')">Terminal</div>
+      <div class="cp-tab" data-tab="git" onclick="setCpTab('git')">Git</div>
+      <div class="cp-tab" data-tab="agents" onclick="setCpTab('agents')">Agents</div>
+      <div class="cp-tab" data-tab="memory" onclick="setCpTab('memory')">Memory</div>
+      <div class="cp-tab" data-tab="env" onclick="setCpTab('env')">Environment</div>
+    </div>
+    <div class="cp-collapse-rail">
+      <div class="btn-icon" onclick="toggleContextPanel()">▸</div>
+    </div>
+    <div class="cp-body" id="cpBody"></div>
+  </aside>
+
+</div>
+
+<!-- COMMAND PALETTE -->
+<div class="palette-scrim" id="paletteScrim" onclick="if(event.target===this) closePalette()">
+  <div class="palette">
+    <div class="palette-input">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-tertiary)"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="paletteInput" placeholder="Type a command or search…" oninput="filterPalette()">
+    </div>
+    <div class="palette-results" id="paletteResults"></div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+/* ============ Nav / mode switching ============ */
+const modeTitles = {
+  dashboard:'Dashboard', projects:'Projects', agents:'Agents', skills:'Skills',
+  tasks:'Tasks', history:'History', marketplace:'Marketplace', settings:'Settings'
+};
+function setMode(mode){
+  document.querySelectorAll('.nav-item[data-mode]').forEach(el=>el.classList.toggle('active', el.dataset.mode===mode));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const view = document.getElementById('view-'+mode);
+  if(view) view.classList.add('active');
+  document.getElementById('breadcrumb').innerHTML = '<b>Personal Workspace</b> ▸ '+ (modeTitles[mode]||mode);
+  document.getElementById('composerDock').style.display = (mode==='settings'||mode==='marketplace') ? 'none' : 'flex';
+  closePalette();
+}
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('collapsed'); }
+function toggleContextPanel(){ document.getElementById('contextPanel').classList.toggle('collapsed'); }
+
+function openProject(name){
+  setMode('projects');
+  document.getElementById('breadcrumb').innerHTML = '<b>Personal Workspace</b> ▸ '+name;
+  pushToast('accent', 'Opened '+name, 'This prototype keeps the Projects list view — the full Project Workspace (Explorer/Editor/Terminal) is specified in 06-project-workspace.md.');
+}
+
+/* ============ Sidebar "agents running" dot ============ */
+function setAgentsDot(on){ document.getElementById('agentsDot').style.display = on?'block':'none'; }
+
+/* ============ Composer ============ */
+function autoGrow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,140)+'px'; }
+function composerKey(e){
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); submitPrompt(); }
+}
+function seedPrompt(text){
+  const el = document.getElementById('composerInput');
+  el.value = text; autoGrow(el); el.focus();
+  window.scrollTo(0,0);
+}
+function submitPrompt(){
+  const el = document.getElementById('composerInput');
+  const text = el.value.trim();
+  if(!text) return;
+  el.value=''; autoGrow(el);
+  setMode('exec-noop'); // clears active nav highlight without matching any
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-exec').classList.add('active');
+  document.getElementById('breadcrumb').innerHTML = '<b>Personal Workspace</b> ▸ beta-code-web ▸ Session';
+  runTurn(text);
+}
+function resumeSession(){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-exec').classList.add('active');
+  document.getElementById('breadcrumb').innerHTML = '<b>Personal Workspace</b> ▸ beta-code-web ▸ Session';
+  document.getElementById('thread').innerHTML='';
+  runTurn('Add rate limiting to the /login endpoint');
+}
+
+/* ============ Execution turn simulation ============ */
+let turnCounter = 0;
+function runTurn(promptText){
+  turnCounter++;
+  const id = 'turn'+turnCounter;
+  const thread = document.getElementById('thread');
+  const wrap = document.createElement('div');
+  wrap.className='turn'; wrap.id=id;
+  wrap.innerHTML = `
+    <div class="turn-user">
+      <div class="av">T</div>
+      <div class="u-text">${escapeHtml(promptText)}</div>
+    </div>
+    <div class="turn-ai-head">
+      <div class="mark mark-sm"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 L21 12 L12 22 L3 12 Z" stroke="#3D8BFF" stroke-width="1.6" fill="rgba(61,139,255,.12)"/></svg></div>
+      <div class="name">Beta Code</div>
+      <div class="phase-dots">
+        <div class="pd" data-p="0"></div><div class="pd" data-p="1"></div><div class="pd" data-p="2"></div><div class="pd" data-p="3"></div><div class="pd" data-p="4"></div>
+      </div>
+    </div>
+    <div id="${id}-body"></div>
+  `;
+  thread.appendChild(wrap);
+  document.getElementById('view-exec').scrollIntoView();
+  setPhase(id,0);
+  runUnderstanding(id, promptText);
+}
+function setPhase(id, n){
+  const wrap = document.getElementById(id);
+  wrap.querySelectorAll('.pd').forEach((d,i)=>{
+    d.classList.remove('active','done');
+    if(i<n) d.classList.add('done');
+    else if(i===n) d.classList.add('active');
+  });
+}
+function escapeHtml(s){ const d=document.createElement('div'); d.innerText=s; return d.innerHTML; }
+
+function runUnderstanding(id, promptText){
+  const body = document.getElementById(id+'-body');
+  const box = document.createElement('div');
+  box.className='block';
+  box.innerHTML = `
+    <div class="block-toggle" onclick="toggleBlock(this)"><span class="chev">▾</span> Reasoning</div>
+    <div class="reasoning-box">Looking at the request — checking for existing related code, conventions already used in this project, and the safest way to make this change without breaking anything else…</div>
+  `;
+  body.appendChild(box);
+  setTimeout(()=>{ runPlanning(id, promptText); }, 1400);
+}
+function toggleBlock(el){
+  el.classList.toggle('collapsed');
+  const box = el.nextElementSibling;
+  box.classList.toggle('collapsed');
+  el.querySelector('.chev').textContent = el.classList.contains('collapsed') ? '▸' : '▾';
+}
+
+const planSteps = [
+  'Read the existing route and middleware files',
+  'Add a token-bucket rate limiter',
+  'Wire the limiter into the route',
+  'Add a test for the limited path'
+];
+function runPlanning(id, promptText){
+  setPhase(id,1);
+  const body = document.getElementById(id+'-body');
+  const box = document.createElement('div');
+  box.className='block';
+  let li = planSteps.map((s,i)=>`<li><span class="plan-glyph" data-i="${i}"></span>${s}</li>`).join('');
+  box.innerHTML = `<div class="block-toggle"><span class="chev">▾</span> Plan</div><ul class="plan-list" id="${id}-plan">${li}</ul>`;
+  body.appendChild(box);
+
+  const confirm = document.createElement('div');
+  confirm.className='confirm-bar';
+  confirm.id = id+'-confirm';
+  confirm.innerHTML = `<span>This will modify 2 files and run 1 terminal command.</span><div class="actions"><button class="btn btn-secondary btn-sm" onclick="pushToast('accent','Adjust','This would reopen the composer scoped to this plan.')">Adjust</button><button class="btn btn-primary btn-sm" onclick="approvePlan('${id}')">Approve</button></div>`;
+  body.appendChild(confirm);
+}
+function approvePlan(id){
+  document.getElementById(id+'-confirm').remove();
+  runExecution(id);
+}
+
+const toolDefs = [
+  {icon:'📄', name:'Read File', input:'auth/login.ts', out:'Found the login handler; no existing rate limiting.'},
+  {icon:'✏️', name:'Edit File', input:'middleware/rate.ts', out:'diff', diff:['+ export function rateLimiter(opts) {','+   return tokenBucket(opts.limit, opts.windowMs);','+ }','- // TODO: add rate limiting']},
+  {icon:'›_', name:'Run Terminal', input:'npm test rate.spec.ts', out:'4 passed, 0 failed'}
+];
+function runExecution(id){
+  setPhase(id,2);
+  const body = document.getElementById(id+'-body');
+  const plan = document.getElementById(id+'-plan');
+  let i=0;
+  function nextTool(){
+    if(i>0){ plan.querySelector(`[data-i="${i-1}"]`).classList.remove('spin'); plan.querySelector(`[data-i="${i-1}"]`).classList.add('done'); }
+    if(i>=toolDefs.length){ setTimeout(()=>runVerification(id), 500); return; }
+    plan.querySelector(`[data-i="${i}"]`).classList.add('spin');
+    const t = toolDefs[i];
+    const card = document.createElement('div');
+    card.className='toolcard';
+    let bodyInner = t.out==='diff'
+      ? `<div class="tc-code">${t.diff.map(l=>`<div class="${l.startsWith('+')?'diff-add':l.startsWith('-')?'diff-rm':''}">${escapeHtml(l)}</div>`).join('')}</div>`
+      : `<div class="tc-code">${escapeHtml(t.out)}</div>`;
+    card.innerHTML = `
+      <div class="tc-row" onclick="this.parentElement.classList.toggle('open')">
+        <div class="tc-icon" style="background:var(--accent-muted); color:var(--accent);">${t.icon}</div>
+        <div class="tc-name">${t.name}</div>
+        <div class="tc-input">${t.input}</div>
+        <div class="tc-status"><span class="spinner-glyph">⏳</span></div>
+      </div>
+      <div class="tc-body"><div class="tc-body-inner">${bodyInner}</div></div>
+    `;
+    body.appendChild(card);
+    setTimeout(()=>{
+      card.querySelector('.tc-status').innerHTML = '<span style="color:var(--success)">✓</span> '+(0.3+Math.random()*0.9).toFixed(1)+'s';
+      i++;
+      nextTool();
+    }, 900);
+  }
+  nextTool();
+}
+function runVerification(id){
+  setPhase(id,3);
+  const body = document.getElementById(id+'-body');
+  const v = document.createElement('div');
+  v.className='verify-line';
+  v.innerHTML = '✓ Verified — tests passing, no lint errors';
+  body.appendChild(v);
+  setTimeout(()=>runCompletion(id), 700);
+}
+function runCompletion(id){
+  setPhase(id,4);
+  const body = document.getElementById(id+'-body');
+  const c = document.createElement('div');
+  c.innerHTML = `
+    <div class="completion-text">Rate limiting is now applied to <code>/login</code> (5 requests / 60s per IP). The change is in <code>middleware/rate.ts</code>, wired into the login route, with a passing test.</div>
+    <div class="turn-actions">
+      <span onclick="pushToast('accent','Retry','Would re-run this turn from Planning.')">⟳ Retry</span>
+      <span onclick="pushToast('accent','Branch','Would fork a new parallel turn from here.')">⎘ Branch here</span>
+      <span>👍</span><span>👎</span>
+    </div>
+  `;
+  body.appendChild(c);
+  pushToast('success','Turn complete','Rate limiting added to /login.');
+}
+
+/* ============ Cold start suggestions on Session view when empty ============ */
+
+/* ============ Agents screen ============ */
+const agentDefs = [
+  {name:'Architect', color:'#5FA8FF', glyph:'◈', state:'done', task:'Reviewed routing structure', pct:100},
+  {name:'Developer', color:'#3D8BFF', glyph:'⌘', state:'running', task:'Implementing rate limiter in middleware/rate.ts', pct:62},
+  {name:'Testing', color:'#4FC3B0', glyph:'✓', state:'queued', task:'Waiting for Developer agent', pct:0},
+];
+function renderAgents(){
+  const grid = document.getElementById('agentsGrid');
+  const running = agentDefs.filter(a=>a.state==='running').length;
+  document.getElementById('agentsSub').textContent = running ? `${running} running · ${agentDefs.length-running} idle` : 'No agents running';
+  setAgentsDot(running>0);
+  grid.innerHTML = agentDefs.map(a=>{
+    const badge = a.state==='running' ? '<span class="badge badge-accent"><span class="live-dot"></span>Running</span>'
+      : a.state==='done' ? '<span class="badge badge-success">Done</span>'
+      : '<span class="badge badge-neutral">Waiting</span>';
+    return `
+    <div class="card agent-card">
+      <div class="ac-head">
+        <div class="chip" style="background:${a.color}22; color:${a.color};">${a.glyph}</div>
+        <div class="ac-name">${a.name} Agent</div>
+        ${badge}
+      </div>
+      <div class="ac-task">${a.task}</div>
+      ${a.state!=='queued' ? `<div class="progress"><div style="width:${a.pct}%"></div></div>` : ''}
+      <div class="ac-foot"><span>CPU ${a.state==='running'?'4%':'0%'} · Mem ${a.state==='running'?'180MB':'—'}</span>${a.state==='running'?'<span>ETA ~40s</span>':''}</div>
+      ${a.state==='running' ? '<div class="ac-controls"><button class="btn btn-secondary btn-sm" onclick="pushToast(\'accent\',\'Paused\',\''+a.name+' agent paused.\')">Pause</button><button class="btn btn-ghost btn-sm" onclick="pushToast(\'error\',\'Stopped\',\''+a.name+' agent stopped.\')">Stop</button></div>' : ''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('orchSection').style.display = 'block';
+  document.getElementById('orchRow').innerHTML = agentDefs.map((a,i)=>{
+    const cls = a.state==='done'?'done':a.state==='running'?'active':'';
+    const line = i<agentDefs.length-1 ? '<div class="orch-line"></div>' : '';
+    return `<div class="orch-node"><div class="orch-chip ${cls}" style="color:${a.color}">${a.glyph}</div><div class="orch-label">${a.name}</div><div class="orch-state">${a.state}</div></div>${line}`;
+  }).join('');
+
+  const types = ['Research','Documentation','Security','Browser','Terminal','Git'];
+  const colors = ['#39C589','#E8A94B','#EF5A5A','#B48CFF','#8FA3B8','#D98CD9'];
+  document.getElementById('agentTypesGrid').innerHTML = types.map((t,i)=>`
+    <div class="card" style="padding:12px 16px; width:140px; text-align:center; cursor:pointer;" onclick="pushToast('accent','Launch ${t} Agent','Would open the Launch Agent modal pre-filled with ${t}.')">
+      <div class="chip" style="background:${colors[i]}22; color:${colors[i]}; margin:0 auto 8px;">●</div>
+      <div style="font-size:12.5px; font-weight:600;">${t}</div>
+    </div>`).join('');
+}
+function launchAgentDemo(){
+  renderAgents();
+  pushToast('accent','Agent launched','Developer agent started on beta-code-web.');
+}
+renderAgents();
+
+/* Dashboard "Running now" mirrors agent state */
+function renderRunningNow(){
+  const running = agentDefs.filter(a=>a.state==='running');
+  const el = document.getElementById('runningNow');
+  if(!running.length){ el.parentElement.style.display='none'; return; }
+  el.parentElement.style.display='block';
+  el.innerHTML = '<div class="section-head" style="margin-bottom:10px;"><div class="section-title">Running now</div></div>' + running.map(a=>`
+    <div class="card agent-card" style="width:260px;">
+      <div class="ac-head"><div class="chip" style="background:${a.color}22; color:${a.color};">${a.glyph}</div><div class="ac-name">${a.name} Agent</div></div>
+      <div class="ac-task">${a.task}</div>
+      <div class="progress"><div style="width:${a.pct}%"></div></div>
+    </div>`).join('');
+}
+renderRunningNow();
+
+/* ============ Marketplace install ============ */
+function installItem(cardEl, name){
+  const btn = cardEl.querySelector('.install-btn');
+  event.stopPropagation();
+  if(btn.textContent.includes('Installed')) return;
+  btn.textContent='Installing…';
+  setTimeout(()=>{ btn.textContent='Installed ✓'; btn.classList.remove('btn-secondary'); btn.classList.add('btn-ghost');
+    pushToast('success', name+' installed', 'Now available wherever this type is used.');
+  }, 900);
+}
+
+/* ============ Right context panel ============ */
+const cpContent = {
+  files: `
+    <div class="tree-row"><span class="file-icon">▾</span>📁 src</div>
+    <div class="tree-row"><span class="indent"></span><span class="file-icon">▾</span>📁 auth</div>
+    <div class="tree-row"><span class="indent"></span><span class="indent"></span>📄 login.ts<span class="fdot" style="background:var(--accent2)"></span></div>
+    <div class="tree-row"><span class="indent"></span><span class="indent"></span>📄 rate.ts<span class="fdot" style="background:var(--success)"></span></div>
+    <div class="tree-row"><span class="indent"></span><span class="file-icon">▸</span>📁 components</div>
+    <div class="tree-row"><span class="file-icon">▸</span>📁 tests</div>
+  `,
+  terminal: `<div class="term-mini">$ npm run dev<br>▲ ready in 320ms<br>➜ Local: http://localhost:3000</div>`,
+  git: `
+    <div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:10px;">main · 2 changed files</div>
+    <div class="tree-row">📄 middleware/rate.ts<span class="fdot" style="background:var(--success); margin-left:auto;"></span></div>
+    <div class="tree-row">📄 auth/login.ts<span class="fdot" style="background:var(--accent2); margin-left:auto;"></span></div>
+    <textarea placeholder="Commit message…" style="width:100%; margin-top:12px; background:var(--bg-raised); border:1px solid var(--border-default); border-radius:8px; padding:8px; color:var(--text-primary); font-size:12.5px; resize:none;" rows="2"></textarea>
+    <button class="btn btn-primary btn-sm" style="margin-top:8px; width:100%; justify-content:center;" onclick="pushToast('success','Committed','2 files committed to main.')">Commit</button>
+  `,
+  agents: null, // rendered dynamically
+  memory: `
+    <div style="font-size:11px; color:var(--text-tertiary); text-transform:uppercase; margin-bottom:6px;">Pinned</div>
+    <div class="tree-row">📄 rate-limits.md</div>
+    <div class="tree-row">📄 login.ts</div>
+    <div style="font-size:11px; color:var(--text-tertiary); text-transform:uppercase; margin:14px 0 6px;">Learned</div>
+    <div style="font-size:12px; color:var(--text-secondary); background:var(--bg-raised); border-radius:8px; padding:8px 10px; margin-bottom:6px;">Uses 2-space indentation, prefers named exports</div>
+    <div style="font-size:12px; color:var(--text-secondary); background:var(--bg-raised); border-radius:8px; padding:8px 10px;">Tests live alongside source as *.spec.ts</div>
+  `,
+  env: `
+    <div class="env-row"><span class="k">Model</span><span>Claude Sonnet 5</span></div>
+    <div class="env-row"><span class="k">Provider</span><span>Anthropic</span></div>
+    <div class="env-row"><span class="k">Context used</span><span>12.4k / 128k</span></div>
+    <div class="env-row"><span class="k">Node</span><span>v20.11</span></div>
+    <div class="env-row"><span class="k">OS</span><span>macOS 15</span></div>
+  `
+};
+function setCpTab(tab){
+  document.querySelectorAll('.cp-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  const body = document.getElementById('cpBody');
+  if(tab==='agents'){
+    body.innerHTML = agentDefs.map(a=>`
+      <div class="card agent-card wide" style="margin-bottom:10px; width:auto;">
+        <div class="ac-head"><div class="chip" style="background:${a.color}22; color:${a.color};">${a.glyph}</div><div class="ac-name" style="font-size:12.5px;">${a.name}</div></div>
+        <div class="ac-task" style="font-size:12px;">${a.task}</div>
+        ${a.state!=='queued' ? `<div class="progress"><div style="width:${a.pct}%"></div></div>` : ''}
+      </div>`).join('') || '<div class="cp-empty">No agents running.</div>';
+    return;
+  }
+  body.innerHTML = cpContent[tab] || `<div class="cp-empty">Nothing to show yet.</div>`;
+}
+setCpTab('files');
+
+/* ============ Toasts ============ */
+function pushToast(kind, title, desc){
+  const icons = {success:'✓', warning:'⚠', error:'✕', accent:'ⓘ'};
+  const colors = {success:'var(--success)', warning:'var(--warning)', error:'var(--error)', accent:'var(--accent)'};
+  const stack = document.getElementById('toastStack');
+  const el = document.createElement('div');
+  el.className='toast';
+  el.innerHTML = `<div class="ti" style="color:${colors[kind]||colors.accent}">${icons[kind]||icons.accent}</div><div><div class="tt">${title}</div><div class="td">${desc||''}</div></div>`;
+  stack.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity 140ms'; el.style.opacity='0'; setTimeout(()=>el.remove(),150); }, 5000);
+}
+
+/* ============ Command Palette ============ */
+const paletteItems = [
+  {group:'Navigate', icon:'▤', label:'Dashboard', action:()=>setMode('dashboard')},
+  {group:'Navigate', icon:'📁', label:'Projects', action:()=>setMode('projects')},
+  {group:'Navigate', icon:'🧩', label:'Agents', action:()=>setMode('agents')},
+  {group:'Navigate', icon:'🛒', label:'Marketplace', action:()=>setMode('marketplace')},
+  {group:'Navigate', icon:'⚙', label:'Settings', action:()=>setMode('settings')},
+  {group:'Files', icon:'📄', label:'src/auth/login.ts', action:()=>openProject('beta-code-web')},
+  {group:'Files', icon:'📄', label:'src/middleware/rate.ts', action:()=>openProject('beta-code-web')},
+  {group:'Commands', icon:'⚙', label:'Switch model → GLM 4.6', meta:'⌘⇧M', action:()=>pushToast('accent','Model switched','Now using GLM 4.6 for new messages.')},
+  {group:'Commands', icon:'▶', label:'Launch Testing Agent', action:()=>{setMode('agents'); launchAgentDemo();}},
+  {group:'Commands', icon:'＋', label:'New Project', meta:'⌘N', action:()=>pushToast('accent','New Project','Would open the New Project modal.')},
+];
+let paletteSel = 0, paletteFiltered = paletteItems;
+function openPalette(){
+  document.getElementById('paletteScrim').classList.add('open');
+  document.getElementById('paletteInput').value='';
+  paletteSel=0;
+  filterPalette();
+  setTimeout(()=>document.getElementById('paletteInput').focus(), 30);
+}
+function closePalette(){ document.getElementById('paletteScrim').classList.remove('open'); }
+function filterPalette(){
+  const q = document.getElementById('paletteInput').value.toLowerCase();
+  paletteFiltered = paletteItems.filter(i=>i.label.toLowerCase().includes(q));
+  paletteSel = 0;
+  renderPalette();
+}
+function renderPalette(){
+  const groups = {};
+  paletteFiltered.forEach(i=>{ (groups[i.group]=groups[i.group]||[]).push(i); });
+  let html='', idx=0;
+  Object.keys(groups).forEach(g=>{
+    html += `<div class="palette-group">${g}</div>`;
+    groups[g].forEach(i=>{
+      html += `<div class="palette-row ${idx===paletteSel?'sel':''}" onclick="runPaletteItem(${paletteFiltered.indexOf(i)})"><span class="pr-icon">${i.icon}</span><span>${i.label}</span>${i.meta?`<span class="pr-meta">${i.meta}</span>`:''}</div>`;
+      idx++;
+    });
+  });
+  document.getElementById('paletteResults').innerHTML = html || '<div class="cp-empty" style="margin-top:20px;">No results</div>';
+}
+function runPaletteItem(i){ const item = paletteFiltered[i]; if(item){ item.action(); closePalette(); } }
+document.getElementById('paletteInput').addEventListener('keydown', e=>{
+  if(e.key==='ArrowDown'){ e.preventDefault(); paletteSel=Math.min(paletteSel+1, paletteFiltered.length-1); renderPalette(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); paletteSel=Math.max(paletteSel-1,0); renderPalette(); }
+  else if(e.key==='Enter'){ e.preventDefault(); runPaletteItem(paletteSel); }
+  else if(e.key==='Escape'){ closePalette(); }
+});
+document.addEventListener('keydown', e=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openPalette(); }
+  if(e.key==='Escape'){ closePalette(); }
+});
+
+/* Show the simulation hint banner briefly on load */
+window.addEventListener('load', ()=>{
+  const b = document.getElementById('hintBanner');
+  b.style.display='block';
+  setTimeout(()=>{ b.style.transition='opacity 400ms'; b.style.opacity='0'; setTimeout(()=>b.style.display='none',400); }, 4000);
+  pushToast('accent','Welcome to Beta Code','Try the composer below, ⌘K for the command palette, or click around the sidebar.');
+});
+</script>
+</body>
+</html>
