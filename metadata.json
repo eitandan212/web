@@ -1,5 +1,5 @@
 {
-  "name": "Pulse · Music Player",
-  "description": "A sleek, mobile-first music player with album art, a full now-playing screen, playlist browsing, search, liked songs, shuffle/repeat and OS media controls.",
-  "requestFramePermissions": []
+  "name": "LookRate · AI Look Score",
+  "description": "A mobile-first app that snaps a photo of your outfit and gives it an instant AI-style Look Score with a category breakdown (lighting, color, contrast, palette harmony), stylist tips, streaks and history.",
+  "requestFramePermissions": ["camera"]
 }

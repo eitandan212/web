@@ -42,3 +42,12 @@ body {
   from { transform: translateY(100%); opacity: 0.4; }
   to   { transform: translateY(0); opacity: 1; }
 }
+
+@keyframes scan {
+  0%   { top: -20%; }
+  100% { top: 100%; }
+}
+.animate-scan {
+  position: absolute;
+  animation: scan 1.6s ease-in-out infinite;
+}

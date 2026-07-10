@@ -1,26 +1,29 @@
-# Pulse · Music Player 🎧
+# LookRate · AI Look Score 📸
 
-A sleek, **mobile-first music player** built with React + Vite + Tailwind CSS.
-Designed to look and feel like a native phone app right in the browser.
+A mobile-first app, built with React + Vite + Tailwind CSS, that rates your
+outfit against an "AI" — snap a photo and get an instant style score,
+right in the browser.
 
 <div align="center">
-  <em>Home · Now Playing · Liked Songs</em>
+  <em>Capture · Analyzing · Score · History · Profile</em>
 </div>
 
 ## Features
 
 - 📱 **Phone-shell layout** — centered device frame on desktop, full-screen on mobile
-- 🎵 **Real audio playback** via the HTML5 Audio API (play / pause / next / prev / seek / volume)
-- 🔀 **Shuffle & repeat** modes
-- 💿 **Now Playing** screen with album art, ambient color background and live progress
-- 🔎 **Search** across songs, artists and albums
-- ❤️ **Liked Songs** library
-- 🎚️ **Mini player** with progress hairline that expands to the full player
-- 🔒 **OS / lock-screen controls** via the Media Session API
-- 🎨 **Generated album covers** — gradients + glyphs, so there are no image assets to ship
+- 📷 **Real photo capture** — take a photo with your camera or pick one from the gallery
+- 🧠 **On-device "AI" scoring** — no network call or model download. The score comes
+  from real pixel statistics of your photo (brightness, contrast, saturation, hue
+  spread), computed on a canvas and framed as stylist feedback
+- 🎯 **Look Score breakdown** — Lighting, Color Pop, Contrast and Palette Harmony,
+  each with its own 0–100 sub-score and a grade (S/A/B/C/D)
+- 💡 **Stylist tips** — feedback text tailored to your weakest and strongest categories
+- 🔥 **Streaks** — consecutive days you've rated a look
+- 🗂️ **History** — every rated look saved locally, with a score trend sparkline
+- 🏅 **Profile & badges** — average/best score and unlockable badges
 
-> Demo tracks stream from [SoundHelix](https://www.soundhelix.com/) (royalty-free).
-> Swap the `src` fields in [`data/tracks.ts`](data/tracks.ts) to use your own.
+> Everything runs client-side and persists to `localStorage` — no backend, no
+> accounts, no photos leave your device.
 
 ## Run locally
 
@@ -36,14 +39,16 @@ npm run preview  # preview the production build
 ## Project structure
 
 ```
-App.tsx              # player state, audio wiring, navigation
-index.tsx            # entry point (mounts App, imports index.css)
-index.css            # Tailwind layers + custom utilities (glass, scrollbars)
-data/tracks.ts       # track list + helpers (gradients, time formatting)
+App.tsx                  # navigation, capture -> analyze -> result flow, persistence
+index.tsx                # entry point (mounts App, imports index.css)
+index.css                # Tailwind layers + custom utilities (glass, scan animation)
+data/scoring.ts           # canvas-based pixel analysis, scoring, grading, tips, streaks
 components/
-  Browse.tsx         # Home: greeting, search, carousel, track list
-  NowPlaying.tsx     # full-screen player
-  MiniPlayer.tsx     # floating mini player
-  AlbumCover.tsx     # generated gradient cover
-  icons.tsx          # inline SVG icon set
+  Capture.tsx             # Home: camera/gallery capture, streak badge, last look
+  Analyzing.tsx           # fake AI scanning animation
+  Result.tsx              # score reveal + category breakdown + tips (fresh or read-only)
+  HistoryView.tsx         # grid of past looks + score trend sparkline
+  ProfileView.tsx         # stats (average/best/streak) + badges
+  ScoreRing.tsx           # circular gauge for the Look Score
+  icons.tsx               # inline SVG icon set
 ```

@@ -14,56 +14,6 @@ const base = (props: P): P => ({
   ...props,
 });
 
-export const PlayIcon = (p: P) => (
-  <svg {...base(p)} fill="currentColor" stroke="none">
-    <path d="M6 4.5v15a1 1 0 0 0 1.54.84l11.5-7.5a1 1 0 0 0 0-1.68L7.54 3.66A1 1 0 0 0 6 4.5Z" />
-  </svg>
-);
-
-export const PauseIcon = (p: P) => (
-  <svg {...base(p)} fill="currentColor" stroke="none">
-    <rect x="6" y="4" width="4" height="16" rx="1.5" />
-    <rect x="14" y="4" width="4" height="16" rx="1.5" />
-  </svg>
-);
-
-export const NextIcon = (p: P) => (
-  <svg {...base(p)} fill="currentColor" stroke="none">
-    <path d="M5 5.5v13a1 1 0 0 0 1.55.83L15 13.7V18a1 1 0 0 0 2 0V6a1 1 0 0 0-2 0v4.3L6.55 4.67A1 1 0 0 0 5 5.5Z" />
-  </svg>
-);
-
-export const PrevIcon = (p: P) => (
-  <svg {...base(p)} fill="currentColor" stroke="none">
-    <path d="M19 5.5v13a1 1 0 0 1-1.55.83L9 13.7V18a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v4.3l8.45-5.63A1 1 0 0 1 19 5.5Z" />
-  </svg>
-);
-
-export const ShuffleIcon = (p: P) => (
-  <svg {...base(p)}>
-    <path d="M16 3h5v5" />
-    <path d="M4 20 21 3" />
-    <path d="M21 16v5h-5" />
-    <path d="m15 15 6 6" />
-    <path d="M4 4l5 5" />
-  </svg>
-);
-
-export const RepeatIcon = (p: P) => (
-  <svg {...base(p)}>
-    <path d="m17 2 4 4-4 4" />
-    <path d="M3 11v-1a4 4 0 0 1 4-4h14" />
-    <path d="m7 22-4-4 4-4" />
-    <path d="M21 13v1a4 4 0 0 1-4 4H3" />
-  </svg>
-);
-
-export const HeartIcon = ({ filled, ...p }: P & { filled?: boolean }) => (
-  <svg {...base(p)} fill={filled ? 'currentColor' : 'none'}>
-    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" />
-  </svg>
-);
-
 export const HomeIcon = (p: P) => (
   <svg {...base(p)}>
     <path d="M3 9.5 12 3l9 6.5" />
@@ -71,51 +21,67 @@ export const HomeIcon = (p: P) => (
   </svg>
 );
 
-export const LibraryIcon = (p: P) => (
+export const CameraIcon = (p: P) => (
   <svg {...base(p)}>
-    <path d="M3 5h18" />
-    <path d="M3 12h18" />
-    <path d="M3 19h12" />
-    <circle cx="19" cy="18" r="2.5" fill="currentColor" stroke="none" />
+    <path d="M4 8a2 2 0 0 1 2-2h1.5l1-2h7l1 2H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" />
+    <circle cx="12" cy="13" r="3.5" />
   </svg>
 );
 
-export const SearchIcon = (p: P) => (
+export const GalleryIcon = (p: P) => (
   <svg {...base(p)}>
-    <circle cx="11" cy="11" r="7" />
-    <path d="m20 20-3.2-3.2" />
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <circle cx="8.5" cy="9.5" r="1.75" fill="currentColor" stroke="none" />
+    <path d="m4 17 5-5 3.5 3.5L16 12l4 5" />
   </svg>
 );
 
-export const ChevronDownIcon = (p: P) => (
-  <svg {...base(p)}>
-    <path d="m6 9 6 6 6-6" />
+export const SparkleIcon = (p: P) => (
+  <svg {...base(p)} fill="currentColor" stroke="none">
+    <path d="M12 2.5c.4 3.3 1 5.4 2.1 6.6 1.2 1.2 3.3 1.8 6.6 2.1-3.3.4-5.4 1-6.6 2.1-1.2 1.2-1.8 3.3-2.1 6.6-.4-3.3-1-5.4-2.1-6.6-1.2-1.2-3.3-1.8-6.6-2.1 3.3-.4 5.4-1 6.6-2.1 1.2-1.2 1.8-3.3 2.1-6.6Z" />
   </svg>
 );
 
-export const VolumeIcon = (p: P) => (
-  <svg {...base(p)}>
-    <path d="M11 5 6 9H3v6h3l5 4V5Z" />
-    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
-    <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+export const FlameIcon = (p: P) => (
+  <svg {...base(p)} fill="currentColor" stroke="none">
+    <path d="M12 2c1 3-2.5 3.8-2.5 7 0 1.5 1 2.5 2 2.5.5 0 1-.3 1-1 0-.6-.4-.7-.4-1.5 0-1 1.4-1.6 1.9-3 1.6 1.6 3 4 3 6.5 0 3.6-3 6.5-6.5 6.5S4 17.6 4 14c0-4 3-7 4.5-9 .5 1 .8 2 .8 3 0 1-.3 1.5-.3 2 0-1.5.6-3 1-4.5C10.5 4 11 3 12 2Z" />
   </svg>
 );
 
-export const MoreIcon = (p: P) => (
+export const UserIcon = (p: P) => (
   <svg {...base(p)}>
-    <circle cx="12" cy="5" r="1.6" fill="currentColor" stroke="none" />
-    <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
-    <circle cx="12" cy="19" r="1.6" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="8" r="3.5" />
+    <path d="M4.5 20c1.4-3.4 4.3-5.5 7.5-5.5s6.1 2.1 7.5 5.5" />
   </svg>
 );
 
-export const WaveIcon = (p: P) => (
+export const ClockIcon = (p: P) => (
   <svg {...base(p)}>
-    <path d="M2 12h2" />
-    <path d="M6 8v8" />
-    <path d="M10 5v14" />
-    <path d="M14 9v6" />
-    <path d="M18 6v12" />
-    <path d="M22 11v2" />
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 7.5V12l3 2" />
+  </svg>
+);
+
+export const ChevronLeftIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="m15 6-6 6 6 6" />
+  </svg>
+);
+
+export const CheckIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="m5 13 4.5 4.5L19 8" />
+  </svg>
+);
+
+export const StarIcon = ({ filled, ...p }: P & { filled?: boolean }) => (
+  <svg {...base(p)} fill={filled ? 'currentColor' : 'none'}>
+    <path d="m12 3 2.7 5.9 6.3.7-4.7 4.4 1.2 6.3-5.5-3.1-5.5 3.1 1.2-6.3-4.7-4.4 6.3-.7Z" />
+  </svg>
+);
+
+export const XIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M6 6l12 12M18 6 6 18" />
   </svg>
 );
