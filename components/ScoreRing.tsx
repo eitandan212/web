@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const ScoreRing: React.FC<{
   score: number;
@@ -7,9 +7,16 @@ const ScoreRing: React.FC<{
   gradient?: [string, string];
   children?: React.ReactNode;
 }> = ({ score, size = 160, stroke = 12, gradient = ['#fb7185', '#f59e0b'], children }) => {
+  // start empty so the ring visibly fills on mount
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setShown(score));
+    return () => cancelAnimationFrame(raf);
+  }, [score]);
+
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const offset = c - (Math.max(0, Math.min(100, score)) / 100) * c;
+  const offset = c - (Math.max(0, Math.min(100, shown)) / 100) * c;
   const gradId = `ring-${gradient[0].replace('#', '')}-${gradient[1].replace('#', '')}`;
 
   return (
@@ -32,7 +39,7 @@ const ScoreRing: React.FC<{
           strokeLinecap="round"
           strokeDasharray={c}
           strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1)' }}
+          style={{ transition: 'stroke-dashoffset 1.1s cubic-bezier(0.16, 1, 0.3, 1)' }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">{children}</div>

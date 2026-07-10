@@ -127,10 +127,15 @@ const NavButton: React.FC<{
 }> = ({ active, label, onClick, children }) => (
   <button
     onClick={onClick}
-    className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors active:scale-95 ${
+    className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors active:scale-95 ${
       active ? 'text-white' : 'text-white/[0.45]'
     }`}
   >
+    <span
+      className={`absolute top-0 h-[3px] w-8 rounded-b-full bg-gradient-to-r from-fuchsia-400 to-amber-300 transition-opacity ${
+        active ? 'opacity-100' : 'opacity-0'
+      }`}
+    />
     {children}
     <span className="text-[10px] font-medium tracking-wide">{label}</span>
   </button>

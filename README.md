@@ -36,6 +36,19 @@ npm run build    # production build into dist/
 npm run preview  # preview the production build
 ```
 
+## Deploy to Vercel
+
+The repo ships with a `vercel.json`, so deploying is one step:
+
+- **From the dashboard:** [vercel.com/new](https://vercel.com/new) → import this
+  GitHub repo → Deploy (Vite is auto-detected, no settings needed).
+- **From the CLI:**
+
+  ```bash
+  npx vercel        # preview deploy
+  npx vercel --prod # production deploy
+  ```
+
 ## Project structure
 
 ```
