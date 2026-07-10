@@ -12,6 +12,12 @@ const MODEL = 'meta/llama-3.2-11b-vision-instruct';
 
 export const NVIDIA_KEY_STORAGE = 'lookrate.nvidiaKey';
 
+// Free-tier key deliberately shipped in the public app — the owner explicitly
+// approved publishing it so the AI stylist works out of the box.
+// Can be replaced with a personal key in Settings.
+export const DEFAULT_NVIDIA_KEY =
+  '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';
+
 const CATEGORY_LABELS: Record<string, string> = {
   fit: 'Fit & Silhouette',
   color: 'Color Coordination',

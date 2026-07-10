@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { LookEntry, analyzeLook, computeStreak, fileToDataUrl, loadImage } from './data/scoring';
-import { NVIDIA_KEY_STORAGE, analyzeWithAI } from './data/aiStylist';
+import { DEFAULT_NVIDIA_KEY, NVIDIA_KEY_STORAGE, analyzeWithAI } from './data/aiStylist';
 import Capture from './components/Capture';
 import Analyzing from './components/Analyzing';
 import Result from './components/Result';
@@ -29,7 +29,7 @@ const App: React.FC = () => {
   const [viewingLook, setViewingLook] = useState<LookEntry | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [apiKey, setApiKey] = useState<string>(() => {
-    try { return localStorage.getItem(NVIDIA_KEY_STORAGE) ?? ''; } catch { return ''; }
+    try { return localStorage.getItem(NVIDIA_KEY_STORAGE) ?? DEFAULT_NVIDIA_KEY; } catch { return DEFAULT_NVIDIA_KEY; }
   });
 
   useEffect(() => {
@@ -49,7 +49,8 @@ const App: React.FC = () => {
   }, []);
 
   const handleSaveKey = useCallback((key: string) => {
-    setApiKey(key);
+    // empty input reverts to the built-in key
+    setApiKey(key || DEFAULT_NVIDIA_KEY);
     try {
       if (key) localStorage.setItem(NVIDIA_KEY_STORAGE, key);
       else localStorage.removeItem(NVIDIA_KEY_STORAGE);

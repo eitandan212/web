@@ -28,13 +28,13 @@ const Settings: React.FC<{
           </button>
         </div>
         <p className="text-white/55 text-sm leading-relaxed mb-4">
-          Paste a free NVIDIA API key to have a real vision model review your looks.
-          Get one at{' '}
+          The AI stylist is ready to go with the built-in key. To use your own free
+          NVIDIA key instead, get one at{' '}
           <a href="https://build.nvidia.com" target="_blank" rel="noreferrer" className="text-fuchsia-300 underline">
             build.nvidia.com
-          </a>
-          . The key is stored only in this browser. Without a key, looks are scored
-          by the on-device Quick Scan.
+          </a>{' '}
+          and paste it here — it's stored only in this browser. Clearing reverts to
+          the built-in key.
         </p>
         <input
           type="password"
