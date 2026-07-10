@@ -1,25 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { SparkleIcon } from './icons';
 
-const STEPS = [
+const SCAN_STEPS = [
   'Scanning color palette…',
   'Measuring contrast…',
   'Checking lighting…',
   'Calculating Look Score…',
 ];
 
-const Analyzing: React.FC<{ image: string; onDone: () => void }> = ({ image, onDone }) => {
+const AI_STEPS = [
+  'Uploading to AI stylist…',
+  'Studying the silhouette…',
+  'Judging color coordination…',
+  'Writing your style notes…',
+];
+
+// Purely presentational — App decides when the analysis is done and unmounts us.
+const Analyzing: React.FC<{ image: string; ai?: boolean }> = ({ image, ai }) => {
+  const steps = ai ? AI_STEPS : SCAN_STEPS;
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    const stepTimer = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 420);
-    const doneTimer = setTimeout(onDone, 1800);
-    return () => {
-      clearInterval(stepTimer);
-      clearTimeout(doneTimer);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const id = setInterval(() => setStep((s) => (s + 1) % steps.length), ai ? 1400 : 450);
+    return () => clearInterval(id);
+  }, [ai, steps.length]);
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-8 text-center">
@@ -30,9 +34,9 @@ const Analyzing: React.FC<{ image: string; onDone: () => void }> = ({ image, onD
       </div>
       <div className="flex items-center gap-2 text-amber-300 mb-2">
         <SparkleIcon width={18} height={18} className="animate-pulse" />
-        <span className="text-sm font-semibold">Analyzing your look</span>
+        <span className="text-sm font-semibold">{ai ? 'AI stylist is looking' : 'Analyzing your look'}</span>
       </div>
-      <p className="text-white/60 text-sm h-5 transition-all">{STEPS[step]}</p>
+      <p className="text-white/60 text-sm h-5 transition-all">{steps[step]}</p>
     </div>
   );
 };

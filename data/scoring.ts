@@ -18,6 +18,7 @@ export interface LookEntry {
   grade: string;
   categories: Category[];
   tips: string[];
+  engine?: 'ai' | 'scan';
 }
 
 const clamp = (n: number, min = 0, max = 100) => Math.max(min, Math.min(max, n));
@@ -28,7 +29,7 @@ const hashSeed = (n: number) => {
   return x - Math.floor(x);
 };
 
-const gradeFor = (score: number) => {
+export const gradeFor = (score: number) => {
   if (score >= 92) return 'S';
   if (score >= 80) return 'A';
   if (score >= 65) return 'B';

@@ -103,6 +103,13 @@ export const TrashIcon = (p: P) => (
   </svg>
 );
 
+export const GearIcon = (p: P) => (
+  <svg {...base(p)}>
+    <circle cx="12" cy="12" r="3.2" />
+    <path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.5-2.4 1a7.6 7.6 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.6 7.6 0 0 0 7 6.5l-2.4-1-2 3.5 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.6 7.6 0 0 0 2.6-1.5l2.4 1 2-3.5Z" />
+  </svg>
+);
+
 export const TrendUpIcon = (p: P) => (
   <svg {...base(p)}>
     <path d="m3 16 6-6 4 4 8-8" />

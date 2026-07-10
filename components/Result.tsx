@@ -92,15 +92,26 @@ const Result: React.FC<{
               <p className="text-[11px] text-white/50 tracking-[0.15em] uppercase">Look Score</p>
             </div>
           </ScoreRing>
-          {delta !== null && delta !== 0 && (
-            <div
-              className={`mt-3 flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${
-                delta > 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300'
+          <div className="mt-3 flex items-center gap-2">
+            <span
+              className={`flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold ${
+                look.engine === 'ai'
+                  ? 'bg-fuchsia-500/15 text-fuchsia-300'
+                  : 'bg-white/10 text-white/50'
               }`}
             >
-              {delta > 0 ? '▲' : '▼'} {Math.abs(delta)} vs last look
-            </div>
-          )}
+              <SparkleIcon width={11} height={11} /> {look.engine === 'ai' ? 'AI Stylist' : 'Quick Scan'}
+            </span>
+            {delta !== null && delta !== 0 && (
+              <span
+                className={`flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold ${
+                  delta > 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300'
+                }`}
+              >
+                {delta > 0 ? '▲' : '▼'} {Math.abs(delta)} vs last look
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3 mb-7">

@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { LookEntry, analyzeLook, computeStreak, fileToDataUrl, loadImage } from './data/scoring';
+import { NVIDIA_KEY_STORAGE, analyzeWithAI } from './data/aiStylist';
 import Capture from './components/Capture';
 import Analyzing from './components/Analyzing';
 import Result from './components/Result';
 import HistoryView from './components/HistoryView';
 import ProfileView from './components/ProfileView';
+import Settings from './components/Settings';
 import { HomeIcon, ClockIcon, UserIcon } from './components/icons';
 
 type Tab = 'home' | 'history' | 'profile';
@@ -25,6 +27,10 @@ const App: React.FC = () => {
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [freshLook, setFreshLook] = useState<LookEntry | null>(null);
   const [viewingLook, setViewingLook] = useState<LookEntry | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [apiKey, setApiKey] = useState<string>(() => {
+    try { return localStorage.getItem(NVIDIA_KEY_STORAGE) ?? ''; } catch { return ''; }
+  });
 
   useEffect(() => {
     try {
@@ -42,17 +48,45 @@ const App: React.FC = () => {
     setPendingImage(dataUrl);
   }, []);
 
-  const handleAnalyzed = useCallback(async () => {
+  const handleSaveKey = useCallback((key: string) => {
+    setApiKey(key);
+    try {
+      if (key) localStorage.setItem(NVIDIA_KEY_STORAGE, key);
+      else localStorage.removeItem(NVIDIA_KEY_STORAGE);
+    } catch {
+      // storage unavailable — key still works for this session
+    }
+  }, []);
+
+  // run the analysis while the Analyzing screen is up:
+  // AI stylist when a key is set, on-device Quick Scan otherwise (or on any AI failure)
+  useEffect(() => {
     if (!pendingImage) return;
-    const img = await loadImage(pendingImage);
-    const analysis = analyzeLook(img);
-    setFreshLook({
-      id: `${Date.now()}-${Math.round(Math.random() * 1e6)}`,
-      createdAt: Date.now(),
-      image: pendingImage,
-      ...analysis,
-    });
-    setPendingImage(null);
+    let cancelled = false;
+    (async () => {
+      const minDelay = new Promise((r) => setTimeout(r, 1800));
+      let analysis: Omit<LookEntry, 'id' | 'createdAt' | 'image'>;
+      if (apiKey) {
+        try {
+          analysis = await analyzeWithAI(pendingImage, apiKey);
+        } catch {
+          analysis = { ...analyzeLook(await loadImage(pendingImage)), engine: 'scan' };
+        }
+      } else {
+        analysis = { ...analyzeLook(await loadImage(pendingImage)), engine: 'scan' };
+      }
+      await minDelay;
+      if (cancelled) return;
+      setFreshLook({
+        id: `${Date.now()}-${Math.round(Math.random() * 1e6)}`,
+        createdAt: Date.now(),
+        image: pendingImage,
+        ...analysis,
+      });
+      setPendingImage(null);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingImage]);
 
   const handleSaveLook = useCallback(() => {
@@ -86,7 +120,7 @@ const App: React.FC = () => {
         {/* Main scrollable view */}
         <div className="relative z-10 h-full pt-6 sm:pt-8">
           {overlay === 'analyzing' && pendingImage && (
-            <Analyzing image={pendingImage} onDone={handleAnalyzed} />
+            <Analyzing image={pendingImage} ai={!!apiKey} />
           )}
           {overlay === 'result-fresh' && freshLook && (
             <Result
@@ -111,8 +145,10 @@ const App: React.FC = () => {
                   lastLook={lastLook}
                   streak={streak}
                   totalLooks={looks.length}
+                  aiEnabled={!!apiKey}
                   onSelectFile={handleSelectFile}
                   onOpenLast={() => lastLook && setViewingLook(lastLook)}
+                  onOpenSettings={() => setSettingsOpen(true)}
                 />
               )}
               {tab === 'history' && (
@@ -122,6 +158,11 @@ const App: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Settings sheet */}
+        {settingsOpen && (
+          <Settings apiKey={apiKey} onSave={handleSaveKey} onClose={() => setSettingsOpen(false)} />
+        )}
 
         {/* Bottom nav */}
         {!overlay && (

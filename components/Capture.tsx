@@ -1,15 +1,17 @@
 import React, { useRef } from 'react';
 import { LookEntry, gradeColor } from '../data/scoring';
-import { CameraIcon, GalleryIcon, FlameIcon, SparkleIcon, ChevronLeftIcon } from './icons';
+import { CameraIcon, GalleryIcon, FlameIcon, SparkleIcon, ChevronLeftIcon, GearIcon } from './icons';
 import ScoreRing from './ScoreRing';
 
 const Capture: React.FC<{
   lastLook: LookEntry | null;
   streak: number;
   totalLooks: number;
+  aiEnabled: boolean;
   onSelectFile: (file: File) => void;
   onOpenLast: () => void;
-}> = ({ lastLook, streak, totalLooks, onSelectFile, onOpenLast }) => {
+  onOpenSettings: () => void;
+}> = ({ lastLook, streak, totalLooks, aiEnabled, onSelectFile, onOpenLast, onOpenSettings }) => {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
@@ -31,12 +33,26 @@ const Capture: React.FC<{
             Rate my look <SparkleIcon width={18} height={18} className="text-amber-300" />
           </h1>
         </div>
-        {streak > 0 && (
-          <div className="flex items-center gap-1.5 glass-bright rounded-full px-3 py-1.5">
-            <FlameIcon width={16} height={16} className="text-orange-400" />
-            <span className="text-sm font-bold">{streak}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {streak > 0 && (
+            <div className="flex items-center gap-1.5 glass-bright rounded-full px-3 py-1.5">
+              <FlameIcon width={16} height={16} className="text-orange-400" />
+              <span className="text-sm font-bold">{streak}</span>
+            </div>
+          )}
+          <button
+            onClick={onOpenSettings}
+            className="relative p-2 glass-bright rounded-full active:scale-90 transition-transform"
+            aria-label="AI Stylist settings"
+          >
+            <GearIcon width={18} height={18} className="text-white/70" />
+            <span
+              className={`absolute top-0.5 right-0.5 h-2 w-2 rounded-full ${
+                aiEnabled ? 'bg-emerald-400' : 'bg-white/25'
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="relative overflow-hidden rounded-3xl p-6 mb-6 bg-gradient-to-br from-fuchsia-600/30 via-rose-500/20 to-amber-400/20 border border-white/10">
@@ -47,7 +63,9 @@ const Capture: React.FC<{
           </div>
           <h2 className="text-xl font-bold mb-1">Snap today's outfit</h2>
           <p className="text-white/60 text-sm mb-5">
-            Get an instant AI style score — lighting, color, contrast &amp; palette harmony.
+            {aiEnabled
+              ? 'A real AI stylist will review your fit, colors and styling.'
+              : 'Instant on-device style scan — connect the AI stylist in settings for a real review.'}
           </p>
           <div className="flex gap-3">
             <button
