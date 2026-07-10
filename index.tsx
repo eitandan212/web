@@ -15,3 +15,10 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+// installable PWA: register the service worker where the platform allows it
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LookEntry, gradeColor } from '../data/scoring';
-import { ChevronLeftIcon, SparkleIcon, CheckIcon } from './icons';
+import { shareLook } from '../data/shareCard';
+import { ChevronLeftIcon, SparkleIcon, CheckIcon, ShareIcon, TrashIcon } from './icons';
 import ScoreRing from './ScoreRing';
 
 // count from 0 to target in sync with the ring fill
@@ -24,15 +25,39 @@ const useCountUp = (target: number, duration = 1100) => {
 const Result: React.FC<{
   look: LookEntry;
   readOnly?: boolean;
+  prevScore?: number | null;
   onClose: () => void;
   onSave?: () => void;
-}> = ({ look, readOnly, onClose, onSave }) => {
+  onDelete?: () => void;
+}> = ({ look, readOnly, prevScore, onClose, onSave, onDelete }) => {
   const counted = useCountUp(look.overall);
   const [barsIn, setBarsIn] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     const raf = requestAnimationFrame(() => setBarsIn(true));
     return () => cancelAnimationFrame(raf);
   }, []);
+
+  const delta = prevScore == null ? null : look.overall - prevScore;
+
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      await shareLook(look);
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      setTimeout(() => setConfirmDelete(false), 2500);
+      return;
+    }
+    onDelete?.();
+  };
 
   return (
     <div className="h-full overflow-y-auto pb-32 scrollbar-none">
@@ -40,7 +65,14 @@ const Result: React.FC<{
         <button onClick={onClose} className="p-1.5 -ml-1.5 active:scale-90 transition-transform" aria-label="Back">
           <ChevronLeftIcon width={22} height={22} />
         </button>
-        <h1 className="font-bold text-lg">{readOnly ? 'Look Detail' : 'Your Look Score'}</h1>
+        <h1 className="font-bold text-lg flex-1">{readOnly ? 'Look Detail' : 'Your Look Score'}</h1>
+        <button
+          onClick={handleShare}
+          disabled={sharing}
+          className="flex items-center gap-1.5 glass-bright rounded-full px-3.5 py-2 text-xs font-semibold active:scale-95 transition-transform disabled:opacity-50"
+        >
+          <ShareIcon width={15} height={15} /> {sharing ? 'Rendering…' : 'Share'}
+        </button>
       </div>
 
       <div className="px-5">
@@ -53,13 +85,22 @@ const Result: React.FC<{
           </div>
         </div>
 
-        <div className="flex justify-center mb-7">
+        <div className="flex flex-col items-center mb-7">
           <ScoreRing score={look.overall} size={168} stroke={13}>
             <div className="text-center">
               <p className="text-4xl font-black tabular-nums">{counted}</p>
               <p className="text-[11px] text-white/50 tracking-[0.15em] uppercase">Look Score</p>
             </div>
           </ScoreRing>
+          {delta !== null && delta !== 0 && (
+            <div
+              className={`mt-3 flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${
+                delta > 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300'
+              }`}
+            >
+              {delta > 0 ? '▲' : '▼'} {Math.abs(delta)} vs last look
+            </div>
+          )}
         </div>
 
         <div className="space-y-3 mb-7">
@@ -103,6 +144,20 @@ const Result: React.FC<{
             className="w-full flex items-center justify-center gap-2 bg-white text-black font-semibold text-sm rounded-2xl py-3.5 active:scale-95 transition-transform"
           >
             <CheckIcon width={18} height={18} /> Save to History
+          </button>
+        )}
+
+        {readOnly && onDelete && (
+          <button
+            onClick={handleDelete}
+            className={`w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold active:scale-95 transition-all ${
+              confirmDelete
+                ? 'bg-rose-500 text-white'
+                : 'glass-bright text-rose-300'
+            }`}
+          >
+            <TrashIcon width={17} height={17} />
+            {confirmDelete ? 'Tap again to delete' : 'Remove from History'}
           </button>
         )}
       </div>

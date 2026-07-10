@@ -19,11 +19,14 @@ const Capture: React.FC<{
     e.target.value = '';
   };
 
+  const hour = new Date().getHours();
+  const greeting = hour < 5 ? 'Late night fit?' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
   return (
     <div className="h-full overflow-y-auto px-5 pt-6 pb-32 scrollbar-none">
       <div className="flex items-center justify-between mb-7">
         <div>
-          <p className="text-white/50 text-xs font-medium tracking-wide uppercase">LookRate</p>
+          <p className="text-white/50 text-xs font-medium tracking-wide uppercase">{greeting}</p>
           <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
             Rate my look <SparkleIcon width={18} height={18} className="text-amber-300" />
           </h1>

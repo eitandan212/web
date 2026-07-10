@@ -62,14 +62,20 @@ const App: React.FC = () => {
     setTab('home');
   }, [freshLook]);
 
+  const handleDeleteLook = useCallback((id: string) => {
+    setLooks((prev) => prev.filter((l) => l.id !== id));
+    setViewingLook(null);
+  }, []);
+
   const overlay = pendingImage ? 'analyzing' : freshLook ? 'result-fresh' : viewingLook ? 'result-view' : null;
 
   return (
     <div className="min-h-screen w-full bg-black flex items-center justify-center sm:py-6 text-white">
       {/* Phone frame */}
       <div className="relative w-full h-screen sm:h-[860px] sm:max-w-[400px] sm:rounded-[44px] overflow-hidden bg-[#080810] sm:border sm:border-white/10 shadow-2xl shadow-black">
-        {/* notch */}
+        {/* notch + status bar */}
         <div className="hidden sm:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-40" />
+        <StatusClock />
 
         {/* ambient app background */}
         <div className="absolute inset-0 -z-0">
@@ -83,24 +89,38 @@ const App: React.FC = () => {
             <Analyzing image={pendingImage} onDone={handleAnalyzed} />
           )}
           {overlay === 'result-fresh' && freshLook && (
-            <Result look={freshLook} onClose={() => setFreshLook(null)} onSave={handleSaveLook} />
-          )}
-          {overlay === 'result-view' && viewingLook && (
-            <Result look={viewingLook} readOnly onClose={() => setViewingLook(null)} />
-          )}
-          {!overlay && tab === 'home' && (
-            <Capture
-              lastLook={lastLook}
-              streak={streak}
-              totalLooks={looks.length}
-              onSelectFile={handleSelectFile}
-              onOpenLast={() => lastLook && setViewingLook(lastLook)}
+            <Result
+              look={freshLook}
+              prevScore={lastLook?.overall ?? null}
+              onClose={() => setFreshLook(null)}
+              onSave={handleSaveLook}
             />
           )}
-          {!overlay && tab === 'history' && (
-            <HistoryView looks={looks} onOpen={(look) => setViewingLook(look)} />
+          {overlay === 'result-view' && viewingLook && (
+            <Result
+              look={viewingLook}
+              readOnly
+              onClose={() => setViewingLook(null)}
+              onDelete={() => handleDeleteLook(viewingLook.id)}
+            />
           )}
-          {!overlay && tab === 'profile' && <ProfileView looks={looks} streak={streak} />}
+          {!overlay && (
+            <div key={tab} className="h-full animate-tab-in">
+              {tab === 'home' && (
+                <Capture
+                  lastLook={lastLook}
+                  streak={streak}
+                  totalLooks={looks.length}
+                  onSelectFile={handleSelectFile}
+                  onOpenLast={() => lastLook && setViewingLook(lastLook)}
+                />
+              )}
+              {tab === 'history' && (
+                <HistoryView looks={looks} onOpen={(look) => setViewingLook(look)} />
+              )}
+              {tab === 'profile' && <ProfileView looks={looks} streak={streak} />}
+            </div>
+          )}
         </div>
 
         {/* Bottom nav */}
@@ -118,6 +138,19 @@ const App: React.FC = () => {
           </nav>
         )}
       </div>
+    </div>
+  );
+};
+
+const StatusClock: React.FC = () => {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="hidden sm:block absolute top-2 left-8 z-40 text-[13px] font-semibold tabular-nums text-white/90">
+      {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
     </div>
   );
 };

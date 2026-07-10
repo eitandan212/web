@@ -85,3 +85,27 @@ export const XIcon = (p: P) => (
     <path d="M6 6l12 12M18 6 6 18" />
   </svg>
 );
+
+export const ShareIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M12 3v12" />
+    <path d="m7.5 7.5 4.5-4.5 4.5 4.5" />
+    <path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />
+  </svg>
+);
+
+export const TrashIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 7h16" />
+    <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    <path d="M6.5 7 7 19a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l.5-12" />
+    <path d="M10 11v6M14 11v6" />
+  </svg>
+);
+
+export const TrendUpIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="m3 16 6-6 4 4 8-8" />
+    <path d="M15 6h6v6" />
+  </svg>
+);
