@@ -22,6 +22,28 @@ Designed to look and feel like a native phone app right in the browser.
 > Demo tracks stream from [SoundHelix](https://www.soundhelix.com/) (royalty-free).
 > Swap the `src` fields in [`data/tracks.ts`](data/tracks.ts) to use your own.
 
+## Quotes
+
+Music quotes live in [`public/quotes.json`](public/quotes.json), so the server hands them
+out as a plain static file — `http://localhost:3000/quotes.json` in dev, and Vite copies
+the file into `dist/` on build.
+
+```bash
+curl http://localhost:3000/quotes.json
+```
+
+Each entry is `{ id, text, author, tags }`. From the app, use the helpers in
+[`data/quotes.ts`](data/quotes.ts):
+
+```ts
+import { fetchQuotes, quoteOfTheDay, randomQuote } from '@/data/quotes';
+
+const quotes = await fetchQuotes();
+console.log(quoteOfTheDay(quotes), randomQuote(quotes));
+```
+
+Add or edit quotes by editing the JSON file — no rebuild needed in dev.
+
 ## Run locally
 
 **Prerequisites:** Node.js
@@ -39,7 +61,9 @@ npm run preview  # preview the production build
 App.tsx              # player state, audio wiring, navigation
 index.tsx            # entry point (mounts App, imports index.css)
 index.css            # Tailwind layers + custom utilities (glass, scrollbars)
+public/quotes.json   # quotes served as a static file at /quotes.json
 data/tracks.ts       # track list + helpers (gradients, time formatting)
+data/quotes.ts       # Quote type + fetch/pick helpers for /quotes.json
 components/
   Browse.tsx         # Home: greeting, search, carousel, track list
   NowPlaying.tsx     # full-screen player
