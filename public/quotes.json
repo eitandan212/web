@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "text": "Without music, life would be a mistake.",
+    "author": "Friedrich Nietzsche",
+    "tags": ["life", "philosophy"]
+  },
+  {
+    "id": 2,
+    "text": "Music is the universal language of mankind.",
+    "author": "Henry Wadsworth Longfellow",
+    "tags": ["language", "connection"]
+  },
+  {
+    "id": 3,
+    "text": "Music expresses that which cannot be said and on which it is impossible to be silent.",
+    "author": "Victor Hugo",
+    "tags": ["expression"]
+  },
+  {
+    "id": 4,
+    "text": "One good thing about music, when it hits you, you feel no pain.",
+    "author": "Bob Marley",
+    "tags": ["healing", "joy"]
+  },
+  {
+    "id": 5,
+    "text": "After silence, that which comes nearest to expressing the inexpressible is music.",
+    "author": "Aldous Huxley",
+    "tags": ["silence", "expression"]
+  },
+  {
+    "id": 6,
+    "text": "Music is the shorthand of emotion.",
+    "author": "Leo Tolstoy",
+    "tags": ["emotion"]
+  },
+  {
+    "id": 7,
+    "text": "The only truth is music.",
+    "author": "Jack Kerouac",
+    "tags": ["truth"]
+  },
+  {
+    "id": 8,
+    "text": "If I were not a physicist, I would probably be a musician.",
+    "author": "Albert Einstein",
+    "tags": ["science", "craft"]
+  },
+  {
+    "id": 9,
+    "text": "Words make you think. Music makes you feel. A song makes you feel a thought.",
+    "author": "Yip Harburg",
+    "tags": ["songwriting", "emotion"]
+  },
+  {
+    "id": 10,
+    "text": "Music acts like a magic key, to which the most tightly closed heart opens.",
+    "author": "Maria von Trapp",
+    "tags": ["heart", "connection"]
+  },
+  {
+    "id": 11,
+    "text": "Life is one grand, sweet song, so start the music.",
+    "author": "Ronald Reagan",
+    "tags": ["life", "beginnings"]
+  },
+  {
+    "id": 12,
+    "text": "Music produces a kind of pleasure which human nature cannot do without.",
+    "author": "Confucius",
+    "tags": ["pleasure", "philosophy"]
+  },
+  {
+    "id": 13,
+    "text": "I don't know anything about music. In my line you don't have to.",
+    "author": "Elvis Presley",
+    "tags": ["humor", "craft"]
+  },
+  {
+    "id": 14,
+    "text": "Music can change the world because it can change people.",
+    "author": "Bono",
+    "tags": ["change", "world"]
+  },
+  {
+    "id": 15,
+    "text": "Turn up the volume until the neighbours know your taste.",
+    "author": "Pulse",
+    "tags": ["fun", "house"]
+  }
+]
