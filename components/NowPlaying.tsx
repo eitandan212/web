@@ -1,6 +1,8 @@
 import React from 'react';
 import { Track, gradientOf, formatTime } from '../data/tracks';
 import AlbumCover from './AlbumCover';
+import Visualizer from './Visualizer';
+import { AnalyserHandle } from '../hooks/useAudioAnalyser';
 import {
   PlayIcon, PauseIcon, NextIcon, PrevIcon, ShuffleIcon, RepeatIcon,
   HeartIcon, ChevronDownIcon, VolumeIcon, MoreIcon,
@@ -24,12 +26,13 @@ interface Props {
   onToggleRepeat: () => void;
   onToggleLike: () => void;
   onClose: () => void;
+  analyser: React.MutableRefObject<AnalyserHandle | null>;
 }
 
 const NowPlaying: React.FC<Props> = ({
   track, isPlaying, currentTime, duration, volume, shuffle, repeat, liked,
   onSeek, onVolume, onPlayPause, onNext, onPrev,
-  onToggleShuffle, onToggleRepeat, onToggleLike, onClose,
+  onToggleShuffle, onToggleRepeat, onToggleLike, onClose, analyser,
 }) => {
   const pct = duration ? (currentTime / duration) * 100 : 0;
 
@@ -37,7 +40,7 @@ const NowPlaying: React.FC<Props> = ({
     <div className="absolute inset-0 z-30 flex flex-col text-white overflow-hidden animate-[slideUp_0.35s_cubic-bezier(0.22,1,0.36,1)]">
       {/* Ambient background driven by the track colors */}
       <div className="absolute inset-0 -z-10" style={{ background: gradientOf(track, 165) }} />
-      <div className="absolute inset-0 -z-10 bg-black/[0.45] backdrop-blur-2xl" />
+      <div className="absolute inset-0 -z-10 bg-black/[0.62] backdrop-blur-2xl" />
       <div
         className="absolute -top-20 -left-16 w-72 h-72 rounded-full blur-3xl opacity-40 -z-10 animate-pulse"
         style={{ background: track.colors[0] }}
@@ -63,13 +66,9 @@ const NowPlaying: React.FC<Props> = ({
 
       {/* Artwork */}
       <div className="flex-1 flex items-center justify-center px-8 min-h-0">
-        <div
-          className={`w-full max-w-[300px] aspect-square shadow-2xl shadow-black/50 transition-transform duration-500 ${
-            isPlaying ? 'scale-100' : 'scale-90'
-          }`}
-        >
+        <Visualizer track={track} isPlaying={isPlaying} analyser={analyser}>
           <AlbumCover track={track} rounded="rounded-[32px]" glyphSize="text-8xl" />
-        </div>
+        </Visualizer>
       </div>
 
       {/* Meta + controls */}

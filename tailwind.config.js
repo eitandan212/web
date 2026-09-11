@@ -6,6 +6,7 @@ export default {
     './index.tsx',
     './components/**/*.{ts,tsx}',
     './data/**/*.{ts,tsx}',
+    './hooks/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {

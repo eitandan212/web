@@ -40,7 +40,9 @@ repeat, likes, tab, expanded) and the single `HTMLAudioElement` behind `audioRef
 Everything under `components/` is presentational — props in, callbacks out. Track data and
 the `gradientOf` / `formatTime` helpers live in `data/tracks.ts`. Album art is generated
 from a two-stop gradient plus an emoji glyph, so the repo ships no image or audio assets;
-audio streams from SoundHelix.
+audio streams from SoundHelix. `hooks/useAudioAnalyser.ts` taps that one audio element into
+a Web Audio analyser, and `components/Visualizer.tsx` paints the Now Playing aura from it on
+a canvas driven by requestAnimationFrame — a 60fps visual that costs zero React renders.
 
 ## Gotchas
 
@@ -57,5 +59,15 @@ audio streams from SoundHelix.
 - **Stale Gemini config.** `vite.config.ts` defines `process.env.API_KEY` and
   `process.env.GEMINI_API_KEY` from the environment. Leftovers from the AI Studio template
   this repo started as; nothing reads them.
+- **The visualizer degrades silently, by design.** Web Audio only returns real frequency
+  data for cross-origin media when the server sends CORS headers, and we deliberately do
+  not set `crossOrigin` on the audio element — setting it would make playback itself fail
+  when the header is missing. When the analyser reads all-zero for ~0.75s the hook switches
+  to a synthesized spectrum. So a visualizer that looks alive is not proof that real audio
+  data is flowing; verify that separately.
+- **Never assign `transform` on an element carrying Tailwind translate utilities.** The
+  visualizer drives the artwork's scale from its animation loop, so the centring
+  `translate(-50%, -50%)` has to be written into the same inline transform string — an
+  assignment replaces the utilities wholesale and the element jumps off-centre.
 - **Indices are into `TRACKS`.** `Browse` renders a filtered list, but `playTrack` and
   `pickNext` index the full `TRACKS` array. Never derive an index from a filtered view.

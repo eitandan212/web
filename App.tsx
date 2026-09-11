@@ -5,6 +5,7 @@ import MiniPlayer from './components/MiniPlayer';
 import NowPlaying from './components/NowPlaying';
 import AlbumCover from './components/AlbumCover';
 import { HomeIcon, HeartIcon, WaveIcon } from './components/icons';
+import { useAudioAnalyser } from './hooks/useAudioAnalyser';
 
 type Tab = 'home' | 'liked';
 
@@ -23,6 +24,10 @@ const App: React.FC = () => {
   const [likes, setLikes] = useState<Set<number>>(new Set([1, 5]));
 
   const current = index === null ? null : TRACKS[index];
+
+  // Spectrum data for the Now Playing visualizer. Bound on first track
+  // selection, which is always a user gesture — the AudioContext needs one.
+  const analyser = useAudioAnalyser(audioRef, index !== null);
 
   // --- audio wiring -------------------------------------------------------
   useEffect(() => {
@@ -221,6 +226,7 @@ const App: React.FC = () => {
             onToggleRepeat={() => setRepeat((r) => !r)}
             onToggleLike={() => toggleLike(current.id)}
             onClose={() => setExpanded(false)}
+            analyser={analyser}
           />
         )}
       </div>
